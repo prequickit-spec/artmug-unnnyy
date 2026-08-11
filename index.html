@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>언니 작가 · 상세페이지 리뉴얼 초안 v2</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  :root{
+    --ink:#1D1D1F;
+    --ink-soft:#6E6E73;
+    --line:#E5E5E7;
+    --bg:#FFFFFF;
+    --bg-soft:#FAFAFA;
+    --accent:#FF5E26;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Pretendard', -apple-system, sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px; margin:0 auto; padding:0 24px;}
+  section{padding:100px 0;}
+  .section-soft{background:var(--bg-soft);}
+  .eyebrow{
+    font-size:15px; font-weight:600; letter-spacing:.14em;
+    color:var(--ink-soft); text-transform:uppercase; margin-bottom:16px;
+  }
+  h2{font-size:34px; font-weight:700; letter-spacing:-0.02em; margin-bottom:14px;}
+  .lead{font-size:18px; color:var(--ink-soft);}
+
+  /* ---- HERO ---- */
+  .hero{padding:96px 0 80px; text-align:center;}
+  .hero .eyebrow{justify-content:center; display:flex; gap:8px;}
+  .hero h1{font-size:58px; font-weight:800; letter-spacing:-0.03em; margin:20px 0 18px;}
+  .hero p.sub{font-size:21px; color:var(--ink-soft); max-width:520px; margin:0 auto 48px;}
+  .hero-visual{
+    width:100%; aspect-ratio:16/8; border-radius:28px;
+    background:linear-gradient(135deg,#2b2b2d,#5a5a5e 60%, #8a8a8e 130%);
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(255,255,255,.55); font-size:16px;
+  }
+  .hero-visual::after{content:"COVER VISUAL — 대표 포스터 예시 자리";}
+  .mark{font-size:15px; color:var(--ink-soft); margin-top:20px;}
+
+  /* ---- PRODUCT CARDS ---- */
+  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:48px;}
+  .card{
+    border:1px solid var(--line); border-radius:20px; padding:32px 26px;
+    display:flex; flex-direction:column; position:relative;
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .card:hover{transform:translateY(-4px); box-shadow:0 20px 40px rgba(0,0,0,.06);}
+  .card .tag{font-size:14px; font-weight:700; color:var(--ink-soft); letter-spacing:.08em; text-transform:uppercase; margin-bottom:12px;}
+  .card h3{font-size:22px; font-weight:700; margin-bottom:6px;}
+  .card .price{font-size:27px; font-weight:800; margin:12px 0 16px;}
+  .card .price small{font-size:15px; font-weight:500; color:var(--ink-soft);}
+  .card ul{list-style:none; margin-bottom:22px; flex:1;}
+  .card li{font-size:16px; color:var(--ink-soft); padding-left:16px; position:relative; margin-bottom:8px;}
+  .card li::before{content:"—"; position:absolute; left:0; color:#C7C7CC;}
+  .card .cta{
+    display:block; text-align:center; padding:12px 0; border-radius:10px;
+    font-size:16px; font-weight:600; border:1px solid var(--ink); color:var(--ink);
+    text-decoration:none; cursor:pointer; background:none;
+  }
+  .card.featured{border-color:var(--ink);}
+  .card.featured .cta{background:var(--ink); color:#fff;}
+  .badge{
+    position:absolute; top:-12px; left:26px; background:var(--ink); color:#fff;
+    font-size:13px; font-weight:700; padding:5px 12px; border-radius:999px;
+  }
+
+  /* ---- PRODUCT DETAIL SECTIONS ---- */
+  .product-detail{scroll-margin-top:40px;}
+  .product-head{margin-bottom:8px;}
+
+  /* 원페이지 캐러셀: 자유 스크롤형 */
+  .scroll-carousel{position:relative; margin-top:36px;}
+  .carousel-nav{display:flex; gap:8px; justify-content:flex-end; margin-bottom:16px;}
+  .carousel-nav button{
+    width:38px; height:38px; border-radius:50%; border:1px solid var(--accent);
+    background:var(--accent); cursor:pointer; font-size:16px; color:#fff;
+  }
+  .carousel-nav button:hover{opacity:.85;}
+  .track{
+    display:flex; gap:14px; overflow-x:auto; scroll-snap-type:x mandatory;
+    padding-bottom:6px; scrollbar-width:none;
+  }
+  .track::-webkit-scrollbar{display:none;}
+  .track .slide{
+    flex:0 0 calc(25% - 11px); aspect-ratio:3/4; border-radius:14px;
+    scroll-snap-align:start; background:var(--bg-soft); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    color:var(--ink-soft); font-size:14px; text-align:center; padding:10px;
+    cursor:zoom-in;
+  }
+  @media(max-width:860px){
+    .track .slide{flex:0 0 88%;}
+  }
+
+  /* 룩북 캐러셀: 페이지 넘김형, 4장 그리드 */
+  .paged-carousel{margin-top:36px;}
+  #lookbook-pages{
+    display:flex; overflow-x:auto; scroll-snap-type:x mandatory;
+    scrollbar-width:none; width:100%;
+  }
+  #lookbook-pages::-webkit-scrollbar{display:none;}
+  .page-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+    flex:0 0 100%; scroll-snap-align:start;
+  }
+  .page-grid .g-item{
+    aspect-ratio:3/4; border-radius:14px; background:var(--bg-soft);
+    border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft); font-size:14px; text-align:center; padding:10px; cursor:zoom-in;
+  }
+  @media(max-width:860px){
+    .page-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  .page-indicator{font-size:15px; color:var(--ink-soft); margin-left:4px;}
+
+  /* 4분할 구조 다이어그램 (정적) */
+  .diagram-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  .diagram-grid .g-item.static{
+    aspect-ratio:3/4; border-radius:14px; background:var(--bg-soft);
+    border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft); font-size:15px; text-align:center; padding:12px; line-height:1.5;
+  }
+  @media(max-width:860px){
+    .diagram-grid{grid-template-columns:repeat(2,1fr);}
+  }
+
+  /* 배너 세트 캐러셀: 커스텀 비율 그리드 */
+  .banner-carousel{margin-top:36px;}
+  #banner-pages{
+    display:flex; overflow-x:auto; scroll-snap-type:x mandatory;
+    scrollbar-width:none; width:100%;
+  }
+  #banner-pages::-webkit-scrollbar{display:none;}
+  .banner-page{flex:0 0 100%; scroll-snap-align:start;}
+  .banner-grid{display:grid; grid-template-columns:minmax(0,8.36fr) minmax(56px,1fr); gap:12px; align-items:start;}
+  .b-top{grid-column:1 / span 2; aspect-ratio:2320/338;}
+  .b-bottom{aspect-ratio:1440/450;}
+  .b-float{aspect-ratio:80/209;}
+  .banner-grid > div{
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:12px;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    color:var(--ink-soft); font-size:14px; text-align:center; padding:0; cursor:zoom-in;
+  }
+  .banner-grid img{width:100%; height:100%; object-fit:cover; display:block;}
+  @media(max-width:860px){
+    .banner-grid{grid-template-columns:1fr; gap:10px;}
+    .b-top{grid-column:1;}
+    .b-bottom{grid-column:1;}
+    .b-float{grid-column:1; width:140px; margin:0 auto; aspect-ratio:80/209;}
+  }
+
+  .note-box{
+    margin-top:28px; padding:18px 22px; background:var(--bg-soft);
+    border:1px solid var(--line); border-radius:14px; font-size:16px; color:var(--ink-soft);
+  }
+
+  /* ---- PROCESS ---- */
+  .process{display:flex; justify-content:space-between; margin-top:48px; gap:8px;}
+  .step{flex:1; text-align:center; position:relative;}
+  .step .num{
+    width:34px; height:34px; border-radius:50%; border:1px solid var(--ink);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 12px;
+    font-size:16px; font-weight:700;
+  }
+  .step p{font-size:16px; font-weight:600;}
+  .step-caption{font-size:13px; color:var(--ink-soft); margin-top:8px; line-height:1.6;}
+  .step::after{content:""; position:absolute; top:17px; left:60%; width:80%; height:1px; background:var(--line);}
+  .step:last-child::after{display:none;}
+  @media(max-width:860px){
+    .process{flex-direction:column; gap:20px;}
+    .step::after{display:none;}
+  }
+
+  /* ---- TRIPLE GRID (자료전달가이드 / 문의양식 공용) ---- */
+  .triple-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:36px;}
+  .triple-card{
+    border:1px solid var(--line); border-radius:16px; padding:26px 24px; position:relative;
+  }
+  .triple-card h4{font-size:18px; font-weight:700; margin-bottom:18px;}
+  .triple-card ol{padding-left:18px;}
+  .triple-card ol li{font-size:15px; color:var(--ink-soft); margin-bottom:12px; line-height:1.7;}
+  .triple-card ol li:last-child{margin-bottom:0;}
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  .field .fname{font-size:15px; font-weight:700; color:var(--ink);}
+  .field .fplaceholder{font-size:14px; color:var(--ink-soft); margin-top:3px; line-height:1.6;}
+  .copy-btn{
+    position:absolute; top:20px; right:20px; font-size:14px; padding:6px 12px;
+    border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .copy-btn:hover{border-color:var(--ink); color:var(--ink);}
+  @media(max-width:860px){.triple-grid{grid-template-columns:1fr;}}
+
+  /* ---- 자료 전달 가이드 탭 ---- */
+  .guide-tabs{display:flex; gap:8px; margin-top:32px; border-bottom:1px solid var(--line);}
+  .guide-tab{
+    padding:12px 20px; font-size:16px; font-weight:600; color:var(--ink-soft);
+    background:none; border:none; border-bottom:2px solid transparent; cursor:pointer;
+    margin-bottom:-1px;
+  }
+  .guide-tab.active{color:var(--ink); border-bottom-color:var(--accent);}
+  .guide-panel{display:none; padding-top:28px;}
+  .guide-panel.active{display:block;}
+  .badge-list{list-style:none;}
+  .badge-list li{display:flex; gap:16px; margin-bottom:20px; align-items:flex-start;}
+  .badge-list li:last-child{margin-bottom:0;}
+  .badge-list .lnum{
+    flex:0 0 30px; width:30px; height:30px; border-radius:50%; border:1px solid var(--ink);
+    display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700;
+    margin-top:1px;
+  }
+  .badge-list li > div:last-child{font-size:16px; color:var(--ink-soft); line-height:1.7; padding-top:4px;}
+
+  /* ---- FAQ ---- */
+  .faq-list{margin-top:32px;}
+  .faq-item{border-top:1px solid var(--line); padding:24px 0;}
+  .faq-item:last-child{border-bottom:1px solid var(--line);}
+  .faq-q{font-size:17px; font-weight:700; color:var(--ink); margin-bottom:10px;}
+  .faq-q::before{content:"Q. ";}
+  .faq-a{font-size:16px; color:var(--ink-soft); line-height:1.7;}
+  .faq-a::before{content:"A. "; color:var(--ink-soft);}
+  .faq-a b{color:var(--accent); font-weight:700;}
+
+  /* ---- FOOTER ---- */
+  footer{padding:56px 0; text-align:center; border-top:1px solid var(--line);}
+  footer .cmark{font-size:15px; letter-spacing:.06em; color:var(--ink); font-weight:700; margin-bottom:10px;}
+  footer p{font-size:14px; color:var(--ink-soft); line-height:1.8;}
+
+  /* ---- LIGHTBOX ---- */
+  .lightbox{
+    position:fixed; inset:0; background:rgba(0,0,0,.82); z-index:999;
+    display:none; align-items:center; justify-content:center; padding:40px;
+  }
+  .lightbox.open{display:flex;}
+  .lightbox-inner{
+    max-width:90vw; max-height:85vh; border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(255,255,255,.7); font-size:16px; text-align:center;
+    position:relative;
+  }
+  .lightbox-inner.placeholder{
+    width:min(90vw, 640px); aspect-ratio:3/4; background:#2c2c2e; padding:20px;
+  }
+  .lightbox-close{
+    position:absolute; top:-44px; right:0; width:36px; height:36px;
+    border-radius:50%; border:1px solid rgba(255,255,255,.4); background:none;
+    color:#fff; font-size:20px; cursor:pointer;
+  }
+
+  @media(max-width:860px){
+    .cards{grid-template-columns:1fr;}
+    .hero h1{font-size:40px;}
+    h2{font-size:26px;}
+    section{padding:72px 0;}
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">POSTER &amp; BANNER DESIGN</div>
+    <h1>언니 작가</h1>
+    <p class="sub">방송·상업용 포스터 &amp; 방송국 배너. 많이 만들지 않습니다, 제대로 만듭니다.</p>
+    <div class="hero-visual"></div>
+    <div class="mark">ⓒ UNNNYY — 모든 작업물에 새겨지는 서명</div>
+  </div>
+</section>
+
+<!-- PRODUCT CARDS -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">LINE-UP</div>
+    <h2>상품 구성</h2>
+    <p class="lead">현재 작업중인 상품 모델은 3가지입니다.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="tag">Single</div>
+        <h3>원페이지 포스터</h3>
+        <div class="price">70,000<small>원</small></div>
+        <ul>
+          <li>단일 포스터 디자인</li>
+          <li>900×1200px(3:4 비율)</li>
+          <li>데뷔, 역팬, 생일 및 이벤트</li>
+        </ul>
+        <button class="cta" data-scroll="onepage">자세히 보기</button>
+      </div>
+
+      <div class="card featured">
+        <span class="badge">BEST</span>
+        <div class="tag">Lookbook</div>
+        <h3>룩북 패키지</h3>
+        <div class="price">110,000<small>원</small></div>
+        <ul>
+          <li>총 4장 고정 구성 디자인</li>
+          <li>룰렛, API 보상 안내용으로 적합</li>
+          <li>구성 변경 시 사전 협의 필요</li>
+        </ul>
+        <button class="cta" data-scroll="lookbook">자세히 보기</button>
+      </div>
+
+      <div class="card" style="position:relative;">
+        <span class="badge" style="background:var(--accent);">HOT</span>
+        <div class="tag">Banner Set</div>
+        <h3>배너 풀패키지</h3>
+        <div class="price">110,000<small>원</small></div>
+        <ul>
+          <li>SOOP 플랫폼 전용</li>
+          <li>상단배너·플로팅·하단배너 6단 구성</li>
+          <li>패키지로만 판매(단일 옵션 구매 불가)</li>
+        </ul>
+        <button class="cta" data-scroll="banner">자세히 보기</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 원페이지 포스터 -->
+<section class="section-soft product-detail" id="onepage">
+  <div class="wrap">
+    <div class="eyebrow">01 · SINGLE</div>
+    <h2 class="product-head">원페이지 포스터</h2>
+    <p class="lead">상세한 내용을 담기보다, 그래픽에 집중한 원페이지 포스터입니다.<br>데뷔나 생일, 역팬데이, 오리지널 아바타 공개 등 중요한 이벤트 라이브를 위해 제작됩니다.</p>
+
+    <div class="scroll-carousel">
+      <div class="carousel-nav">
+        <button data-carousel-prev="onepage-track">‹</button>
+        <button data-carousel-next="onepage-track">›</button>
+      </div>
+      <div class="track" id="onepage-track">
+        <!-- 12 samples -->
+        <div class="slide" data-lightbox-img="assets/onepage-01.png" data-lightbox="원페이지 샘플 01" style="padding:0;"><img src="assets/onepage-01.png" alt="원페이지 샘플 01" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
+        <div class="slide" data-lightbox-img="assets/onepage-02.jpg" data-lightbox="원페이지 샘플 02" style="padding:0;"><img src="assets/onepage-02.jpg" alt="원페이지 샘플 02" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
+        <div class="slide" data-lightbox="원페이지 샘플 03">샘플 03</div>
+        <div class="slide" data-lightbox="원페이지 샘플 04">샘플 04</div>
+        <div class="slide" data-lightbox="원페이지 샘플 05">샘플 05</div>
+        <div class="slide" data-lightbox="원페이지 샘플 06">샘플 06</div>
+        <div class="slide" data-lightbox="원페이지 샘플 07">샘플 07</div>
+        <div class="slide" data-lightbox="원페이지 샘플 08">샘플 08</div>
+        <div class="slide" data-lightbox="원페이지 샘플 09">샘플 09</div>
+        <div class="slide" data-lightbox="원페이지 샘플 10">샘플 10</div>
+        <div class="slide" data-lightbox="원페이지 샘플 11">샘플 11</div>
+        <div class="slide" data-lightbox="원페이지 샘플 12">샘플 12</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 룩북 패키지 -->
+<section class="product-detail" id="lookbook">
+  <div class="wrap">
+    <div class="eyebrow">02 · LOOKBOOK</div>
+    <h2 class="product-head">룩북 패키지</h2>
+    <p class="lead">룰렛 보상이나 API 보상 안내를 목적으로 만들어지는 시리즈 이미지입니다.<br>여러가지 의상과 헤어, 확정 구매 또는 API 달성 공약을 포함한 상세 페이지가 필요할 때 룩북 패키지를 추천합니다.</p>
+
+    <div class="diagram-grid" style="margin-top:36px;">
+      <div class="g-item static">01<br>커버 비주얼</div>
+      <div class="g-item static">02<br>의상 안내</div>
+      <div class="g-item static">03<br>헤어 안내</div>
+      <div class="g-item static">04<br>보상 안내</div>
+    </div>
+
+    <div class="note-box">
+      위 4장 구성이 기본이며, 변경 시 사전 협의가 필요합니다.<br>
+      페이지 추가 시 장당 추가금이 발생합니다. (이때 베이스 디자인은 다른 페이지와 동일합니다.)<br>
+      사전 협의 시, '렌즈 선택'을 넣어 달라고 말씀해 주시면 추가금 없이 상대적으로 구성이 적은 페이지에 함께 넣어 드릴 수도 있습니다.
+    </div>
+
+    <div class="paged-carousel">
+      <div class="carousel-nav">
+        <span class="page-indicator" id="lookbook-indicator">1 / 2</span>
+        <button data-pages-prev="lookbook-pages">‹</button>
+        <button data-pages-next="lookbook-pages">›</button>
+      </div>
+      <div id="lookbook-pages">
+        <div class="page-grid active">
+          <div class="g-item" data-lightbox-img="assets/lookbook-01.png" data-lightbox="룩북 샘플 01 · 커버" style="padding:0; overflow:hidden;"><img src="assets/lookbook-01.png" alt="커버" style="width:100%; height:100%; object-fit:cover;"></div>
+          <div class="g-item" data-lightbox-img="assets/lookbook-02.png" data-lightbox="룩북 샘플 02 · 의상" style="padding:0; overflow:hidden;"><img src="assets/lookbook-02.png" alt="의상" style="width:100%; height:100%; object-fit:cover;"></div>
+          <div class="g-item" data-lightbox-img="assets/lookbook-03.png" data-lightbox="룩북 샘플 03 · 헤어" style="padding:0; overflow:hidden;"><img src="assets/lookbook-03.png" alt="헤어" style="width:100%; height:100%; object-fit:cover;"></div>
+          <div class="g-item" data-lightbox-img="assets/lookbook-04.png" data-lightbox="룩북 샘플 04 · 확정안내" style="padding:0; overflow:hidden;"><img src="assets/lookbook-04.png" alt="확정안내" style="width:100%; height:100%; object-fit:cover;"></div>
+        </div>
+        <div class="page-grid">
+          <div class="g-item" data-lightbox="룩북 샘플 05 · 커버">05 커버</div>
+          <div class="g-item" data-lightbox="룩북 샘플 06 · 의상">06 의상</div>
+          <div class="g-item" data-lightbox="룩북 샘플 07 · 헤어">07 헤어</div>
+          <div class="g-item" data-lightbox="룩북 샘플 08 · 확정안내">08 확정안내</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 배너 풀패키지 -->
+<section class="section-soft product-detail" id="banner">
+  <div class="wrap">
+    <div class="eyebrow">03 · BANNER SET</div>
+    <h2 class="product-head">배너 풀패키지</h2>
+    <p class="lead">SOOP 방송국 상단 배너, 플로팅 배너, 하단 배너 6단 패키지 디자인입니다.<br>패키지로만 작업하며, 단일 옵션만 구매하는 것은 불가능합니다.</p>
+
+    <div class="banner-carousel">
+      <div class="carousel-nav">
+        <span class="page-indicator" id="banner-indicator">1 / 3</span>
+        <button data-pages-prev="banner-pages">‹</button>
+        <button data-pages-next="banner-pages">›</button>
+      </div>
+      <div id="banner-pages">
+        <div class="banner-page active">
+          <div class="banner-grid">
+            <div class="b-top" data-lightbox-img="assets/banner-top.png" data-lightbox="배너 세트 A · 상단배너"><img src="assets/banner-top.png" alt="상단배너"></div>
+            <div class="b-bottom" data-lightbox-img="assets/banner-bottom6.gif" data-lightbox="배너 세트 A · 하단배너 6단"><img src="assets/banner-bottom6.gif" alt="하단배너 6단"></div>
+            <div class="b-float" data-lightbox-img="assets/banner-float.gif" data-lightbox="배너 세트 A · 플로팅배너"><img src="assets/banner-float.gif" alt="플로팅배너"></div>
+          </div>
+        </div>
+        <div class="banner-page">
+          <div class="banner-grid">
+            <div class="b-top" data-lightbox="배너 세트 B · 상단배너">상단배너</div>
+            <div class="b-bottom" data-lightbox="배너 세트 B · 하단배너 6단">하단배너 6단</div>
+            <div class="b-float" data-lightbox="배너 세트 B · 플로팅배너">플로팅</div>
+          </div>
+        </div>
+        <div class="banner-page">
+          <div class="banner-grid">
+            <div class="b-top" data-lightbox="배너 세트 C · 상단배너">상단배너</div>
+            <div class="b-bottom" data-lightbox="배너 세트 C · 하단배너 6단">하단배너 6단</div>
+            <div class="b-float" data-lightbox="배너 세트 C · 플로팅배너">플로팅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-box">하단 배너 6단은 실제 적용 시 채도 차이가 있을 수 있습니다. (미리 보기 파일을 만드는 과정에서 채도가 낮아지는 경우)</div>
+  </div>
+</section>
+
+<!-- 자료 전달 가이드 -->
+<section class="product-detail" id="guide">
+  <div class="wrap">
+    <div class="eyebrow">GUIDE</div>
+    <h2>자료 전달 가이드</h2>
+    <p class="lead">사진을 촬영하기 전에 반드시 확인해 주세요.</p>
+
+    <div class="note-box">
+      1. 사진 촬영 시 반드시 고화질, 투명 배경으로 촬영해 주셔야 합니다. 아바타 화질이 깨지면 디자인이 아무리 좋아도 퀄리티가 낮아 보입니다.<br>
+      2. 하나의 폴더에 사진을 모두 넣은 다음, 그 폴더를 압축해 한번에 업로드해주세요.
+    </div>
+
+    <div class="guide-tabs">
+      <button class="guide-tab active" data-guide-tab="onepage-guide">원페이지 포스터</button>
+      <button class="guide-tab" data-guide-tab="lookbook-guide">룩북 패키지</button>
+      <button class="guide-tab" data-guide-tab="banner-guide">배너 풀패키지</button>
+    </div>
+
+    <div class="guide-panel active" id="onepage-guide">
+      <ol class="badge-list">
+        <li><span class="lnum">1</span><div>(필수) 상반신 5컷 이상</div></li>
+        <li><span class="lnum">2</span><div>(선택) 전신 2컷 이상, 얼빡 2컷 이상<br>모든 컷을 사용하지는 않으나, 레퍼런스나 레이아웃에 따라 추가 컷으로 사용할 수 있습니다.<br>오리지널 아바타 공개나 신의상 공개처럼 실루엣 처리가 필요한 포스터일 경우는 전신 3컷, 상반신 3컷 보내주시면 됩니다. (다른 포스터 타입은 해당 없음)</div></li>
+        <li><span class="lnum">3</span><div>포스터에 넣고 싶은 문구: 이벤트 날짜, 이벤트 내용 등 포스터에 들어가야 할 텍스트</div></li>
+      </ol>
+    </div>
+
+    <div class="guide-panel" id="lookbook-guide">
+      <ol class="badge-list">
+        <li><span class="lnum">1</span><div>메인 커버 비주얼(첫 페이지)에 들어갈 상반신 5컷 이상</div></li>
+        <li><span class="lnum">2</span><div>각 의상마다 전신 1컷 이상<br>캐릭터 및 의상 잘리는 부분 없게 사진 확인해 주세요. 레이아웃에 따라 전신을 쓰는 경우도 있고, 허벅지에서 자르는 경우도 있습니다.<br>의상마다 포즈를 다르게 하면 훨씬 좋은 결과물이 나옵니다.</div></li>
+        <li><span class="lnum">3</span><div>각 헤어마다 상반신 1컷 이상<br>헤어 윗부분, 좌우 잘리지 않게 사진 확인해 주세요.</div></li>
+        <li><span class="lnum">4</span><div>메인 커버 비주얼(첫 페이지)에 넣고 싶은 문구: 룰렛 기간, 서버 기간 등 넣고 싶은 텍스트 작성해 주세요.</div></li>
+        <li><span class="lnum">5</span><div>의상 안내 페이지에 넣고 싶은 문구: 없어도 됩니다.</div></li>
+        <li><span class="lnum">6</span><div>헤어 안내 페이지에 넣고 싶은 문구: 없어도 됩니다.</div></li>
+        <li><span class="lnum">7</span><div>확정 보상 안내 페이지(4번째 페이지)에 들어갈 내용 적어 주세요.</div></li>
+      </ol>
+    </div>
+
+    <div class="guide-panel" id="banner-guide">
+      <ol class="badge-list">
+        <li><span class="lnum">1</span><div>상반신 12컷 이상</div></li>
+        <li><span class="lnum">2</span><div>전신 3컷 이상</div></li>
+        <li><span class="lnum">3</span><div>얼빡 5컷 이상</div></li>
+        <li><span class="lnum">4</span><div>배너 풀패키지에 들어갈 이름(닉네임 자체를 그대로 적어 주셔도 되고, 시청자라면 시청자를 부르는 애칭을 적어 주셔도 됩니다.)</div></li>
+        <li><span class="lnum">5</span><div>(선택) 시청자에게 선물할 목적이라면 시청자 아이디를 적어 주세요. 디자인에 영문을 활용할 일이 많아 참고하기 위함입니다.</div></li>
+        <li><span class="lnum">6</span><div>반드시 넣고 싶은 텍스트가 있다면 적어 주세요.</div></li>
+        <li><span class="lnum">7</span><div>(중요) 다수의 패키지를 신청할 시 패키지마다 다른 의상 및 헤어로 사진 촬영하는 것을 권장합니다. 훨씬 다채로운 느낌이 듭니다.</div></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- 문의 양식 -->
+<section class="section-soft">
+  <div class="wrap">
+    <div class="eyebrow">BEFORE YOU ASK</div>
+    <h2>문의 양식</h2>
+    <p class="lead">상품에 맞는 양식을 복사해서 문의 시 함께 보내주세요.</p>
+
+    <div class="triple-grid">
+      <div class="triple-card">
+        <button class="copy-btn" data-copy-target>복사</button>
+        <h4>원페이지 포스터</h4>
+        <div class="field"><div class="fname">1. 방송국 주소</div></div>
+        <div class="field"><div class="fname">2. 포스터 타입</div><div class="fplaceholder">예: 데뷔, 생일, 역팬데이 등</div></div>
+        <div class="field"><div class="fname">3. 원하는 마감 기한</div></div>
+        <div class="field"><div class="fname">4. 특이사항</div><div class="fplaceholder">예: 원하는 특정 컨셉이 있다거나, 반드시 추가해야 하는 내용이 있다면 말씀해 주세요.</div></div>
+      </div>
+
+      <div class="triple-card">
+        <button class="copy-btn" data-copy-target>복사</button>
+        <h4>룩북 패키지</h4>
+        <div class="field"><div class="fname">1. 방송국 주소</div></div>
+        <div class="field"><div class="fname">2. 프로젝트 타이틀</div><div class="fplaceholder">예: 12월 룰렛, 충동서버 API 보상 등 — 비주얼 커버 타이틀로 들어갈 룩북 패키지의 타이틀</div></div>
+        <div class="field"><div class="fname">3. 원하는 마감 기한</div></div>
+        <div class="field"><div class="fname">4. 의상 개수</div><div class="fplaceholder">예: 8가지 또는 3의 배수일 때 가장 깔끔합니다.</div></div>
+        <div class="field"><div class="fname">5. 헤어 개수</div><div class="fplaceholder">예: 9가지 또는 4의 배수일 때 가장 깔끔합니다.</div></div>
+        <div class="field"><div class="fname">6. 특이사항</div><div class="fplaceholder">예: 원하는 특정 컨셉이 있다거나, 반드시 추가해야 하는 내용이 있다면 말씀해 주세요.</div></div>
+      </div>
+
+      <div class="triple-card">
+        <button class="copy-btn" data-copy-target>복사</button>
+        <h4>배너 풀패키지</h4>
+        <div class="field"><div class="fname">1. 방송국 주소</div></div>
+        <div class="field"><div class="fname">2. 필요 개수</div><div class="fplaceholder">예: 패키지 몇 개가 필요한지</div></div>
+        <div class="field"><div class="fname">3. 원하는 마감 기한</div></div>
+        <div class="field"><div class="fname">4. 특이사항</div><div class="fplaceholder">예: 원하는 특정 컨셉이 있다거나, 반드시 추가해야 하는 내용이 있다면 말씀해 주세요.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">FAQ</div>
+    <h2>자주 묻는 질문</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">마감 기한은 어떻게 되나요?</div>
+        <div class="faq-a">결제 및 <b>자료 전달일</b> 기준 평균 7일 이내 완료되고 있습니다. 정확한 마감 일정은 작업할 내용에 따라 달라질 수 있으니 직접 문의를 통해 확인해 주세요.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">세금계산서, 현금영수증 발행이 가능한가요?</div>
+        <div class="faq-a">아트머그 플랫폼 운영지침에 따라 2026년 8월 1일부터 비사업자 작가는 세금계산서, 현금영수증 발행이 <b>불가합니다</b>.<br>대신 결제 후 주문 관리에서 <b>거래명세서</b>를 출력할 수 있으며, 이를 세무·회계 과정에서 지출 증빙으로 사용 가능합니다.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">PSD 파일 받을 수 있나요?</div>
+        <div class="faq-a">유료 에셋 이미지를 사용하는 경우가 간혹 있기 때문에 PSD 파일 공유는 불가능합니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" id="lightboxClose">✕</button>
+    <span id="lightboxLabel"></span>
+  </div>
+</div>
+
+<script>
+  // 상품 카드 "자세히 보기" -> 해당 섹션 스크롤
+  document.querySelectorAll('[data-scroll]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.getElementById(btn.dataset.scroll).scrollIntoView({behavior:'smooth'});
+    });
+  });
+
+  // 원페이지: 자유 스크롤 캐러셀
+  document.querySelectorAll('[data-carousel-next]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const track = document.getElementById(btn.dataset.carouselNext);
+      track.scrollBy({left: track.clientWidth, behavior:'smooth'});
+    });
+  });
+  document.querySelectorAll('[data-carousel-prev]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const track = document.getElementById(btn.dataset.carouselPrev);
+      track.scrollBy({left: -track.clientWidth, behavior:'smooth'});
+    });
+  });
+
+  // 페이지 넘김형 캐러셀 (룩북 / 배너) 공통 함수 — 원페이지와 동일한 네이티브 스크롤 방식
+  function setupPagedCarousel(containerId, pageSelector, indicatorId){
+    const container = document.getElementById(containerId);
+    const pages = container.querySelectorAll(pageSelector);
+    let idx = 0;
+    function updateIndicator(){
+      const indicator = document.getElementById(indicatorId);
+      if(indicator) indicator.textContent = (idx+1) + ' / ' + pages.length;
+    }
+    function goTo(i){
+      idx = (i + pages.length) % pages.length;
+      container.scrollTo({left: idx * container.clientWidth, behavior:'smooth'});
+      updateIndicator();
+    }
+    document.querySelector('[data-pages-prev="'+containerId+'"]').addEventListener('click', ()=>{
+      goTo(idx - 1);
+    });
+    document.querySelector('[data-pages-next="'+containerId+'"]').addEventListener('click', ()=>{
+      goTo(idx + 1);
+    });
+    let scrollTimer;
+    container.addEventListener('scroll', ()=>{
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(()=>{
+        idx = Math.round(container.scrollLeft / container.clientWidth);
+        updateIndicator();
+      }, 100);
+    });
+    updateIndicator();
+  }
+  setupPagedCarousel('lookbook-pages', '.page-grid', 'lookbook-indicator');
+  setupPagedCarousel('banner-pages', '.banner-page', 'banner-indicator');
+
+  // 자료 전달 가이드 탭
+  document.querySelectorAll('.guide-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      document.querySelectorAll('.guide-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.guide-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.guideTab).classList.add('active');
+    });
+  });
+
+  // 문의 양식 복사 버튼
+  document.querySelectorAll('[data-copy-target]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.triple-card');
+      const names = card.querySelectorAll('.field .fname');
+      let text = '';
+      names.forEach(n=>{ text += n.textContent.trim() + ': \n'; });
+      navigator.clipboard.writeText(text).then(()=>{
+        const original = btn.textContent;
+        btn.textContent = '복사됨';
+        setTimeout(()=>{ btn.textContent = original; }, 1500);
+      });
+    });
+  });
+
+  // 라이트박스
+  const lightbox = document.getElementById('lightbox');
+  const lightboxLabel = document.getElementById('lightboxLabel');
+  const lightboxInner = document.querySelector('.lightbox-inner');
+  document.querySelectorAll('[data-lightbox]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const imgSrc = el.dataset.lightboxImg;
+      if(imgSrc){
+        lightboxInner.classList.remove('placeholder');
+        lightboxLabel.innerHTML = '<img src="'+imgSrc+'" alt="" style="display:block; max-width:90vw; max-height:85vh; width:auto; height:auto; object-fit:contain; border-radius:8px;">';
+      }else{
+        lightboxInner.classList.add('placeholder');
+        lightboxLabel.textContent = el.dataset.lightbox + ' — 확대 이미지 자리';
+      }
+      lightbox.classList.add('open');
+    });
+  });
+  function closeLightbox(){ lightbox.classList.remove('open'); }
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeLightbox(); });
+
+  // ---- iframe 높이 자동 보고 (아트머그 상세페이지에 embed용) ----
+  function reportHeight(){
+    var h = document.body.scrollHeight;
+    window.parent.postMessage({ type: 'resize', height: h }, '*');
+  }
+  window.addEventListener('load', reportHeight);
+  window.addEventListener('resize', reportHeight);
+  // 이미지 로딩 완료마다 다시 계산 (이미지가 늦게 로드되며 높이가 바뀌는 경우 대응)
+  document.querySelectorAll('img').forEach(function(img){
+    if(img.complete){ reportHeight(); }
+    else { img.addEventListener('load', reportHeight); }
+  });
+  // 탭 전환, 캐러셀 슬라이드 등으로 높이가 바뀔 수 있어 약간의 지연 후 한번 더 보고
+  setTimeout(reportHeight, 500);
+  setTimeout(reportHeight, 1500);
+</script>
+
+</body>
+</html>
