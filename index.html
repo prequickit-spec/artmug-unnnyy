@@ -189,6 +189,7 @@
   .ex{margin:0;min-width:0}
   .ex .ph{display:flex;align-items:center;justify-content:center;border-radius:10px;border:1px dashed rgba(0,0,0,.18);background:var(--fill-quaternary);color:var(--text-tertiary);font-size:13px;text-align:center;overflow:hidden;aspect-ratio:3/4}
   .ex img{width:100%;height:100%;object-fit:cover;display:block}
+  .ex-fixed .ph,.ex-fixed .ph.loaded{aspect-ratio:5/7}
   .ex .ph.loaded{border:1px solid var(--divider);background:#fff}
   .ex figcaption{font-size:13px;color:var(--text-secondary);text-align:center;margin-top:6px}
   .bn-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
@@ -420,7 +421,7 @@
           <div class="crumb">01 · One-page Poster</div>
           <h1 class="page-title">원페이지 포스터</h1>
           <p class="lead">상세한 내용을 담기보다, 그래픽에 집중한 원페이지 포스터입니다.<br>데뷔나 생일, 역팬데이, 오리지널 아바타 공개 등 중요한 이벤트 라이브를 위해 제작됩니다.</p>
-          <div class="ex-grid"><figure class="ex " data-ex="poster-1"><div class="ph"><span>데뷔</span></div><figcaption>데뷔</figcaption></figure><figure class="ex " data-ex="poster-2"><div class="ph"><span>아바타 공개</span></div><figcaption>아바타 공개</figcaption></figure><figure class="ex " data-ex="poster-3"><div class="ph"><span>역팬데이</span></div><figcaption>역팬데이</figcaption></figure><figure class="ex " data-ex="poster-4"><div class="ph"><span>기념일</span></div><figcaption>기념일</figcaption></figure></div>
+          <div class="ex-grid ex-fixed"><figure class="ex " data-ex="poster-1"><div class="ph"><span>데뷔</span></div><figcaption>데뷔</figcaption></figure><figure class="ex " data-ex="poster-2"><div class="ph"><span>아바타 공개</span></div><figcaption>아바타 공개</figcaption></figure><figure class="ex " data-ex="poster-3"><div class="ph"><span>역팬데이</span></div><figcaption>역팬데이</figcaption></figure><figure class="ex " data-ex="poster-4"><div class="ph"><span>기념일</span></div><figcaption>기념일</figcaption></figure></div>
           <div class="sec-actions">
             <button class="btn secondary" type="button" data-open="poster">포트폴리오 보기</button>
             <button class="btn primary" type="button" data-open="message" data-product="poster">문의하기</button>
@@ -1122,7 +1123,7 @@
         var ph = f.querySelector('.ph');
         ph.classList.add('loaded'); ph.innerHTML = '';
         im.alt = name; ph.appendChild(im);
-        if(!f.className.match(/bn-/)) ph.style.aspectRatio = im.naturalWidth + '/' + im.naturalHeight;
+        if(!f.className.match(/bn-/) && !f.closest('.ex-fixed')) ph.style.aspectRatio = im.naturalWidth + '/' + im.naturalHeight;
         if(typeof updateSpacer === 'function') updateSpacer();
       };
       im.onerror = tryNext;
