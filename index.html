@@ -1,700 +1,1182 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>언니 작가 · 상세페이지 리뉴얼 초안 v2</title>
-<link rel="stylesheet" as="style" crossorigin
-  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<title>UNNNYY 데스크탑</title>
 <style>
-  :root{
-    --ink:#1D1D1F;
-    --ink-soft:#6E6E73;
-    --line:#E5E5E7;
-    --bg:#FFFFFF;
-    --bg-soft:#FAFAFA;
-    --accent:#FF5E26;
+  /* 레이아웃: 맥 바탕화면 + 메뉴바 + Dock(5개). 창 5개(Finder, 포트폴리오 3, 문의)가 아이콘에서 열리고 드래그로 이동 */
+  @font-face{
+    font-family:"Pretendard Variable";
+    src:url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/woff2/PretendardVariable.woff2") format("woff2-variations");
+    font-weight:45 920; font-style:normal; font-display:swap;
   }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
+  :root{
+    color-scheme:light;
+    --font:"Pretendard Variable","Pretendard",-apple-system,BlinkMacSystemFont,"SF Pro Text","Apple SD Gothic Neo","Noto Sans KR","Segoe UI",Roboto,sans-serif;
+    /* macOS 신호등 */
+    --tl-red:#FF5F57; --tl-yellow:#FFBD2E; --tl-green:#28C840; --tl-off:#CFCFD2;
+    --accent:#007AFF;
+    /* text */
+    --text-primary:rgba(0,0,0,1);
+    --text-secondary:rgba(60,60,67,.74);
+    --text-tertiary:rgba(60,60,67,.58);
+    /* fills */
+    --fill-primary:rgba(120,120,128,.2);
+    --fill-secondary:rgba(120,120,128,.16);
+    --fill-tertiary:rgba(118,118,128,.12);
+    --fill-quaternary:rgba(116,116,128,.08);
+    --sidebar-bg:#F5F5F7;
+    --content-bg:#FFFFFF;
+    --divider:rgba(0,0,0,.08);
+    --pv-side:#EFEFF1;
+    --pv-canvas:#FFFFFF;
+    --menubar-h:28px;
+    --dock-reserve:104px;
+    --dock-base:56px;
+    --wall-base:#4d5fd6;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;overflow:hidden}
   body{
-    font-family:'Pretendard', -apple-system, sans-serif;
-    color:var(--ink);
-    background:var(--bg);
-    line-height:1.6;
+    font-family:var(--font);
+    color:var(--text-primary);
+    background:var(--wall-base);
     -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:1040px; margin:0 auto; padding:0 24px;}
-  section{padding:100px 0;}
-  .section-soft{background:var(--bg-soft);}
-  .eyebrow{
-    font-size:15px; font-weight:600; letter-spacing:.14em;
-    color:var(--ink-soft); text-transform:uppercase; margin-bottom:16px;
-  }
-  h2{font-size:34px; font-weight:700; letter-spacing:-0.02em; margin-bottom:14px;}
-  .lead{font-size:18px; color:var(--ink-soft);}
+  button{font-family:inherit}
+  svg.i{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
 
-  /* ---- PRODUCT CARDS ---- */
-  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:48px;}
-  .card{
-    border:1px solid var(--line); border-radius:20px; padding:32px 26px;
-    display:flex; flex-direction:column; position:relative;
-    transition:transform .25s ease, box-shadow .25s ease;
-  }
-  .card:hover{transform:translateY(-4px); box-shadow:0 20px 40px rgba(0,0,0,.06);}
-  .card .tag{font-size:14px; font-weight:700; color:var(--ink-soft); letter-spacing:.08em; text-transform:uppercase; margin-bottom:12px;}
-  .card h3{font-size:22px; font-weight:700; margin-bottom:6px;}
-  .card .price{font-size:27px; font-weight:800; margin:12px 0 16px;}
-  .card .price small{font-size:15px; font-weight:500; color:var(--ink-soft);}
-  .card ul{list-style:none; margin-bottom:22px; flex:1;}
-  .card li{font-size:16px; color:var(--ink-soft); padding-left:16px; position:relative; margin-bottom:8px;}
-  .card li::before{content:"—"; position:absolute; left:0; color:#C7C7CC;}
-  .card .cta{
-    display:block; text-align:center; padding:12px 0; border-radius:10px;
-    font-size:16px; font-weight:600; border:1px solid var(--ink); color:var(--ink);
-    text-decoration:none; cursor:pointer; background:none;
-  }
-  .card.featured{border-color:var(--ink);}
-  .card.featured .cta{background:var(--ink); color:#fff;}
-  .badge{
-    position:absolute; top:-12px; left:26px; background:var(--ink); color:#fff;
-    font-size:13px; font-weight:700; padding:5px 12px; border-radius:999px;
+  /* ───────── 바탕화면 ───────── */
+  .desktop{
+    position:fixed; inset:0; overflow:hidden;
+    background:
+      radial-gradient(1100px 700px at 12% 8%, #8fc0ff 0, transparent 60%),
+      radial-gradient(900px 650px at 88% 18%, #c8a0ff 0, transparent 58%),
+      radial-gradient(1000px 800px at 72% 105%, #ff9d7c 0, transparent 60%),
+      radial-gradient(800px 700px at 0% 100%, #5568ff 0, transparent 58%),
+      linear-gradient(160deg,#6a7df0,#8a63d8 55%,#f08a7a);
   }
 
-  /* ---- PRODUCT DETAIL SECTIONS ---- */
-  .product-detail{scroll-margin-top:40px;}
-  .product-head{margin-bottom:8px;}
+  /* 메뉴바 */
+  .menubar{
+    position:absolute; top:0; left:0; right:0; height:calc(var(--menubar-h) + env(safe-area-inset-top,0px));
+    padding:env(safe-area-inset-top,0px) 14px 0;
+    display:flex; align-items:center; gap:18px;
+    background:rgba(255,255,255,.34);
+    -webkit-backdrop-filter:blur(24px) saturate(1.8); backdrop-filter:blur(24px) saturate(1.8);
+    font-size:13px; color:rgba(0,0,0,.86); z-index:900; user-select:none;
+  }
+  .menubar .app{font-weight:700}
+  .menubar .m{font-weight:500}
+  .menubar .spacer{flex:1}
+  .menubar .clock{font-variant-numeric:tabular-nums;font-weight:500}
 
-  /* 원페이지 캐러셀: 자유 스크롤형 */
-  .scroll-carousel{position:relative; margin-top:36px;}
-  .carousel-nav{display:flex; gap:8px; justify-content:flex-end; margin-bottom:16px;}
-  .carousel-nav button{
-    width:38px; height:38px; border-radius:50%; border:1px solid var(--accent);
-    background:var(--accent); cursor:pointer; font-size:16px; color:#fff;
+  /* ───────── 창 공통 ───────── */
+  /* 스크롤바: 항상 밝은 얇은 막대 (다크모드 무시) */
+  *{scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.28) transparent}
+  @supports not (scrollbar-color:auto){
+    ::-webkit-scrollbar{width:10px;height:10px;background:transparent}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.28);border-radius:999px;border:2px solid transparent;background-clip:padding-box}
+    ::-webkit-scrollbar-button{display:none;width:0;height:0}
+    ::-webkit-scrollbar-corner{background:transparent}
   }
-  .carousel-nav button:hover{opacity:.85;}
-  .track{
-    display:flex; gap:14px; overflow-x:auto; scroll-snap-type:x mandatory;
-    padding-bottom:6px; scrollbar-width:none;
+  .win{
+    position:absolute; z-index:10;
+    background:var(--content-bg);
+    border-radius:12px;
+    box-shadow:0 0 0 1px rgba(0,0,0,.14), 0 8px 22px rgba(0,0,0,.18);
+    overflow:hidden; display:flex; flex-direction:column;
+    opacity:0; transform:scale(.12); pointer-events:none;
+    transition:transform .3s cubic-bezier(.22,.8,.24,1), opacity .22s ease;
   }
-  .track::-webkit-scrollbar{display:none;}
-  .track .slide{
-    flex:0 0 calc(25% - 11px); aspect-ratio:3/4; border-radius:14px;
-    scroll-snap-align:start; background:var(--bg-soft); border:1px solid var(--line);
-    display:flex; align-items:center; justify-content:center; overflow:hidden;
-    color:var(--ink-soft); font-size:14px; text-align:center; padding:10px;
-   
-  }
-  @media(max-width:860px){
-    .track .slide{flex:0 0 88%;}
-  }
+  .win.open{opacity:1; transform:none; pointer-events:auto}
+  .win.focus{box-shadow:0 0 0 1px rgba(0,0,0,.18), 0 26px 60px rgba(0,0,0,.34)}
+  .win.snap{transition:transform .3s cubic-bezier(.22,.8,.24,1), opacity .22s ease, left .26s ease, top .26s ease, width .26s ease, height .26s ease}
+  .win.dragging{transition:none}
 
-  /* 룩북 캐러셀: 페이지 넘김형, 4장 그리드 */
-  .paged-carousel{margin-top:36px;}
-  #lookbook-pages{
-    display:flex; overflow-x:auto; scroll-snap-type:x mandatory;
-    scrollbar-width:none; width:100%;
+  .titlebar{
+    height:52px; flex:0 0 52px; display:flex; align-items:center; gap:12px;
+    padding:0 16px; background:var(--sidebar-bg); border-bottom:1px solid var(--divider);
+    position:relative; user-select:none; touch-action:none; cursor:default;
   }
-  #lookbook-pages::-webkit-scrollbar{display:none;}
-  .page-grid{
-    display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
-    flex:0 0 100%; scroll-snap-align:start;
+  .win:not(.focus) .titlebar{background:#F8F8F9}
+  .traffic{display:flex; gap:8px; flex:0 0 auto}
+  .traffic button{width:12px;height:12px;border-radius:50%;border:0;padding:0;display:block;cursor:pointer;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14)}
+  .traffic .red{background:var(--tl-red)}
+  .traffic .yellow{background:var(--tl-yellow)}
+  .traffic .green{background:var(--tl-green)}
+  .win:not(.focus) .traffic button{background:var(--tl-off)}
+  .tb-btn{
+    height:28px; min-width:28px; padding:0 6px; border-radius:7px; border:0; background:transparent;
+    display:inline-flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;
+    color:var(--text-secondary); font-size:17px;
   }
-  @media(max-width:860px){
-    .page-grid{grid-template-columns:repeat(2,1fr);}
-  }
-  .page-indicator{font-size:15px; color:var(--ink-soft); margin-left:4px;}
+  .tb-btn:hover{background:var(--fill-quaternary)}
+  .tb-btn:focus-visible,.traffic button:focus-visible,.dock-item:focus-visible,.sub-item:focus-visible,.thumb:focus-visible,.m-item:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .titlebar-title{position:absolute; left:0; right:0; text-align:center; font-size:13px; font-weight:600; color:var(--text-secondary); pointer-events:none}
 
-  /* 룩북 카드: 이미지 + 캡션 한 세트로 묶어서 모바일 2x2에서도 항상 같이 붙어 이동 */
-  .lookbook-card{display:flex; flex-direction:column; gap:10px;}
-  .lookbook-card .g-item{
-    aspect-ratio:3/4; border-radius:14px; background:var(--bg-soft);
-    border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
-    color:var(--ink-soft); font-size:14px; text-align:center; padding:10px;
+  /* ───────── Finder / 문의 공통 본문 ───────── */
+  .f-body,.m-body{flex:1; display:flex; min-height:0; position:relative}
+  .sidebar{
+    width:190px; flex:0 0 190px; background:var(--sidebar-bg);
+    border-right:1px solid var(--divider); padding:14px 10px; overflow-y:auto; overflow-x:hidden;
+    transition:width .22s ease, flex-basis .22s ease, padding .22s ease, border-width .22s ease;
   }
-  .g-caption{
-    background:var(--bg-soft); border:1px solid var(--line); border-radius:10px;
-    padding:10px 8px; text-align:center; font-size:14px; color:var(--ink-soft);
+  .sidebar > *{min-width:0}
+  .win:not(.narrow).sb-collapsed .sidebar{width:0;flex-basis:0;padding-left:0;padding-right:0;border-right-width:0;overflow:hidden}
+  .folder-group{margin-bottom:18px}
+  .folder-label{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:13px;font-weight:700;border-radius:6px}
+  .folder-label svg{font-size:16px;color:var(--accent)}
+  .sub-list{list-style:none;margin:2px 0 0;padding:0 0 0 22px}
+  .sub-list li{margin:1px 0}
+  .sub-item{
+    width:100%; display:flex; align-items:center; gap:8px; padding:6px 8px; border:0; background:transparent;
+    font-size:13px; color:var(--text-secondary); border-radius:6px; cursor:pointer; text-align:left;
   }
-  .g-caption .caption-num{display:block; font-size:13px; color:var(--ink-soft); opacity:.7; margin-bottom:2px;}
+  .sub-item svg{font-size:15px;opacity:.8}
+  .sub-item .go{margin-left:auto;font-size:12px;opacity:.45}
+  .sub-item:hover{background:var(--fill-quaternary)}
+  .sub-item.active{background:var(--accent);color:#fff;font-weight:600}
+  .sub-item.active svg{opacity:1}
+  .content{--px:44px;--py:36px;flex:1;overflow-y:auto;padding:var(--py) var(--px);min-width:0;scroll-padding-top:28px}
+  .crumb{font-size:13px;color:var(--text-tertiary);margin-bottom:6px}
+  h1.page-title{font-size:28px;font-weight:800;margin:0 0 22px;letter-spacing:-.02em;text-wrap:balance}
+  .placeholder-tag{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--tl-yellow);padding:2px 8px;border-radius:5px;margin-left:8px;vertical-align:middle;letter-spacing:0}
+  .card{background:var(--fill-quaternary);border:1px solid var(--divider);border-radius:12px;padding:20px 22px;margin-bottom:16px}
+  .card h3{margin:0 0 8px;font-size:15px;font-weight:700}
+  .card p{margin:0;font-size:14px;line-height:1.7;color:var(--text-secondary)}
+  .price-row{display:flex;align-items:baseline;gap:8px;margin:4px 0 20px;flex-wrap:wrap}
+  .price{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+  .price-note{font-size:14px;color:var(--text-tertiary)}
+  .field{margin-bottom:18px}
+  .field label{display:block;font-size:14px;font-weight:700;margin-bottom:6px}
+  .field input[type=text],.field textarea{width:100%;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:#fff;color:var(--text-primary)}
+  .field textarea{min-height:70px;resize:vertical}
+  .field input::placeholder,.field textarea::placeholder{color:rgba(60,60,67,.5)}
+  .toolbar-toggle{display:inline-flex;border:1px solid rgba(0,0,0,.1);border-radius:9px;overflow:hidden;margin-bottom:20px}
+  .toolbar-toggle button{border:0;background:#fff;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer}
+  .toolbar-toggle button.active{background:var(--fill-primary);color:var(--text-primary)}
+  .toolbar-toggle button+button{border-left:1px solid rgba(0,0,0,.1)}
+  .switch-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--divider)}
+  .switch-row:last-child{border-bottom:0}
+  .switch-label{font-size:14px}
+  .switch{width:44px;height:26px;border-radius:999px;background:var(--accent);position:relative;flex:0 0 auto}
+  .switch::after{content:"";position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .copy-btn{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer}
 
-  /* 배너 세트 캐러셀: 커스텀 비율 그리드 */
-  .banner-carousel{margin-top:36px;}
-  #banner-pages{
-    display:flex; overflow-x:auto; scroll-snap-type:x mandatory;
-    scrollbar-width:none; width:100%;
-  }
-  #banner-pages::-webkit-scrollbar{display:none;}
-  .banner-page{flex:0 0 100%; scroll-snap-align:start;}
-  .banner-grid{display:grid; grid-template-columns:minmax(0,8.36fr) minmax(56px,1fr); gap:12px; align-items:start;}
-  .b-top{grid-column:1 / span 2; aspect-ratio:2320/338;}
-  .b-bottom{aspect-ratio:1440/450;}
-  .b-float{aspect-ratio:80/209;}
-  .banner-grid > div{
-    background:var(--bg-soft); border:1px solid var(--line); border-radius:12px;
-    display:flex; align-items:center; justify-content:center; overflow:hidden;
-    color:var(--ink-soft); font-size:14px; text-align:center; padding:0;
-  }
-  .banner-grid img{width:100%; height:100%; object-fit:cover; display:block;}
 
-  .note-box{
-    margin-top:28px; padding:18px 22px; background:var(--bg-soft);
-    border:1px solid var(--line); border-radius:14px; font-size:16px; color:var(--ink-soft);
-  }
+  .lead{margin:0 0 20px;font-size:15px;line-height:1.75;color:var(--text-primary)}
+  .note{margin:16px 0 0;font-size:14px;line-height:1.7;color:var(--text-tertiary)}
+  /* 문의 양식: 확인 사항 + 안내 + 복사 */
+  .field .hint{font-size:13.5px;line-height:1.65;color:var(--text-tertiary);margin:-2px 0 8px}
+  .req{color:#FF3B30;font-weight:700}
+  .checks{background:var(--fill-quaternary);border:1px solid var(--divider);border-radius:12px;padding:16px 18px;margin:8px 0 20px}
+  .checks-title{font-size:15px;font-weight:700;margin-bottom:4px}
+  .checks-desc{font-size:13.5px;color:var(--text-secondary);margin-bottom:6px}
+  .sw-row{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:14px 0;border-bottom:1px solid var(--divider);cursor:pointer}
+  .sw-row:last-child{border-bottom:0;padding-bottom:4px}
+  .sw-row .tx{font-size:14.5px;line-height:1.65;color:var(--text-secondary);flex:1;min-width:0}
+  .sw-row input{position:absolute;opacity:0;width:0;height:0}
+  .sw{flex:0 0 44px;width:44px;height:26px;border-radius:999px;background:rgba(120,120,128,.32);position:relative;transition:background .2s;margin-top:0}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+  .sw-row input:checked + .sw{background:var(--accent)}
+  .sw-row input:checked + .sw::after{transform:translateX(18px)}
+  .sw-row input:checked ~ .tx, .sw-row:has(input:checked) .tx{color:var(--text-primary)}
+  .sw-row input:focus-visible + .sw{outline:2px solid var(--accent);outline-offset:2px}
+  .copy-btn:disabled{background:var(--fill-tertiary);color:var(--text-tertiary);cursor:not-allowed}
+  .copy-msg{font-size:13.5px;color:var(--text-tertiary);margin-top:10px;min-height:18px}
+  .copy-fallback{width:100%;min-height:150px;margin-top:10px;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:10px 12px;font:13px/1.6 inherit;font-family:inherit}
+  /* 상품 예시 이미지 */
+  .ex-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 16px}
+  .win.narrow .ex-grid{grid-template-columns:repeat(2,1fr)}
+  .ex{margin:0;min-width:0}
+  .ex .ph{display:flex;align-items:center;justify-content:center;border-radius:10px;border:1px dashed rgba(0,0,0,.18);background:var(--fill-quaternary);color:var(--text-tertiary);font-size:13px;text-align:center;overflow:hidden;aspect-ratio:3/4}
+  .ex img{width:100%;height:100%;object-fit:cover;display:block}
+  .ex .ph.loaded{border:1px solid var(--divider);background:#fff}
+  .ex figcaption{font-size:13px;color:var(--text-secondary);text-align:center;margin-top:6px}
+  .bn-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+  .bn-row{display:flex;gap:8px;align-items:flex-start}
+  .bn-top .ph{aspect-ratio:1000/145}
+  .bn-bot{flex:3.24 1 0}.bn-bot .ph{aspect-ratio:3.24}
+  .bn-float{flex:.43 1 0}.bn-float .ph{aspect-ratio:.43}
+  .bn-wrap .ex figcaption{font-size:12px}
+  .bn-float .ph span{padding:0 2px;word-break:keep-all}
 
-  /* ---- PROCESS ---- */
-  .process{display:flex; justify-content:space-between; margin-top:48px; gap:8px;}
-  .step{flex:1; text-align:center; position:relative;}
-  .step .num{
-    width:34px; height:34px; border-radius:50%; border:1px solid var(--ink);
-    display:flex; align-items:center; justify-content:center; margin:0 auto 12px;
-    font-size:16px; font-weight:700;
-  }
-  .step p{font-size:16px; font-weight:600;}
-  .step-caption{font-size:13px; color:var(--ink-soft); margin-top:8px; line-height:1.6;}
-  .step::after{content:""; position:absolute; top:17px; left:60%; width:80%; height:1px; background:var(--line);}
-  .step:last-child::after{display:none;}
-  @media(max-width:860px){
-    .process{flex-direction:column; gap:20px;}
-    .step::after{display:none;}
-  }
+  /* Finder: 한 페이지 스크롤 구간 */
+  .doc-sec + .doc-sec{margin-top:48px;padding-top:44px;border-top:1px solid var(--divider)}
+  .sec-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+  .btn{height:40px;padding:0 20px;border-radius:10px;border:0;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.secondary{background:var(--fill-tertiary);color:var(--text-primary)}
+  .btn:hover{filter:brightness(.97)}
+  .btn:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .chips{display:none}
+  .chip{border:0;background:transparent;padding:0;display:flex;flex-direction:column;align-items:center;gap:4px;width:88px;cursor:pointer;color:var(--text-primary);border-radius:12px}
+  .chip .fi-wrap{display:flex;align-items:center;justify-content:center;padding:3px 10px;border-radius:10px;transition:background .15s}
+  .chip .fi{width:40px;height:34px;display:block}
+  .chip .lb{font-size:11px;font-weight:600;line-height:15px;padding:0 8px;border-radius:999px}
+  .chip.active .fi-wrap{background:rgba(0,122,255,.16)}
+  .chip.active .lb{background:var(--accent);color:#fff}
 
-  /* ---- TRIPLE GRID (자료전달가이드 / 문의양식 공용) ---- */
-  .triple-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:36px;}
-  .triple-card{
-    border:1px solid var(--line); border-radius:16px; padding:26px 24px; position:relative;
+  /* 문의 창: 왼쪽 상품 목록 */
+  .m-item{
+    width:100%;display:flex;align-items:center;gap:10px;padding:8px 10px;border:0;background:transparent;border-radius:9px;cursor:pointer;text-align:left;color:var(--text-primary);margin-bottom:2px;
   }
-  .triple-card h4{font-size:18px; font-weight:700; margin-bottom:18px;}
-  .triple-card ol{padding-left:18px;}
-  .triple-card ol li{font-size:15px; color:var(--ink-soft); margin-bottom:12px; line-height:1.7;}
-  .triple-card ol li:last-child{margin-bottom:0;}
-  .field{margin-bottom:16px;}
-  .field:last-child{margin-bottom:0;}
-  .field .fname{font-size:15px; font-weight:700; color:var(--ink);}
-  .field .fplaceholder{font-size:14px; color:var(--ink-soft); margin-top:3px; line-height:1.6;}
-  @media(max-width:860px){.triple-grid{grid-template-columns:1fr;}}
+  .m-item:hover{background:var(--fill-quaternary)}
+  .m-item.active{background:var(--accent);color:#fff}
+  .m-av{width:34px;height:34px;border-radius:50%;flex:0 0 34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700}
+  .m-txt{display:flex;flex-direction:column;min-width:0;line-height:1.3}
+  .m-name{font-size:13px;font-weight:700}
+  .m-sub{font-size:13px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .m-item.active .m-sub{color:rgba(255,255,255,.8)}
+  .m-list-head{font-size:12px;font-weight:700;color:var(--text-tertiary);padding:2px 10px 8px;letter-spacing:.04em}
 
-  /* ---- 자료 전달 가이드 탭 ---- */
-  .guide-tabs{display:flex; gap:8px; margin-top:32px; border-bottom:1px solid var(--line);}
-  .guide-tab{
-    padding:12px 20px; font-size:16px; font-weight:600; color:var(--ink-soft);
-    background:none; border:none; border-bottom:2px solid transparent; cursor:pointer;
-    margin-bottom:-1px;
+  /* ───────── 포트폴리오(미리보기) ───────── */
+  .pv-titles{display:flex;flex-direction:column;line-height:1.25;min-width:0;margin-left:2px}
+  .pv-title{font-size:13px;font-weight:700;white-space:nowrap}
+  .pv-sub{font-size:12px;color:var(--text-secondary);white-space:nowrap}
+  .tb-spacer{flex:1}
+  .inquire{
+    height:28px;padding:0 14px;border-radius:999px;border:0;background:var(--accent);color:#fff;
+    font-size:12.5px;font-weight:700;cursor:pointer;margin-left:6px;white-space:nowrap
   }
-  .guide-tab.active{color:var(--ink); border-bottom-color:var(--accent);}
-  .guide-panel{display:none; padding-top:28px;}
-  .guide-panel.active{display:block;}
-  .badge-list{list-style:none;}
-  .badge-list li{display:flex; gap:16px; margin-bottom:20px; align-items:flex-start;}
-  .badge-list li:last-child{margin-bottom:0;}
-  .badge-list .lnum{
-    flex:0 0 30px; width:30px; height:30px; border-radius:50%; border:1px solid var(--ink);
-    display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700;
-    margin-top:1px;
+  .inquire:hover{filter:brightness(1.06)}
+  .pv-body{flex:1;display:flex;min-height:0;position:relative;background:var(--pv-canvas)}
+  .thumbs{
+    width:176px;flex:0 0 176px;background:var(--pv-side);overflow-y:auto;padding:14px 0 18px;
+    display:flex;flex-direction:column;align-items:center;gap:6px;border-right:1px solid rgba(0,0,0,.1);
   }
-  .badge-list li > div:last-child{font-size:16px; color:var(--ink-soft); line-height:1.7; padding-top:4px;}
+  .thumb{
+    width:140px;border:0;background:transparent;padding:8px 8px 6px;border-radius:8px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:6px;flex:0 0 auto;color:var(--text-secondary);font-size:11px;
+  }
+  .thumb .t-img{display:block;position:relative;overflow:hidden;width:100%;aspect-ratio:3/4;border-radius:3px;background:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.2),0 1px 3px rgba(0,0,0,.14)}
+  .thumb .t-img img{display:block;width:100%;height:100%;object-fit:cover}
+  .thumb:hover{background:rgba(0,0,0,.04)}
+  .thumb.sel{background:rgba(0,0,0,.09);box-shadow:inset 0 0 0 2px rgba(120,120,128,.35);color:var(--text-primary);font-weight:600}
+  .canvas{flex:1;min-width:0;display:flex;overflow:auto;padding:24px;background:var(--pv-canvas)}
+  .stack{margin:auto;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:14px}
+  .item{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .cap{text-align:center;font-size:13px;font-weight:600;color:var(--text-secondary)}
+  .frame{
+    position:relative;background:#fff;overflow:hidden;border-radius:3px;container-type:inline-size;
+    border:1px solid rgba(0,0,0,.1);
+    box-shadow:0 1px 2px rgba(0,0,0,.06),0 6px 20px rgba(0,0,0,.09);
+  }
+  .frame img{display:block;width:100%;height:100%}
+  .frame .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:8px}
+  .ph .p-no{font-size:clamp(14px,7cqw,40px);font-weight:800;color:rgba(0,0,0,.32);letter-spacing:-.01em}
+  .ph .p-note{font-size:clamp(10px,2.6cqw,13px);color:rgba(0,0,0,.42)}
+  .pv-empty{margin:auto;font-size:14px;color:var(--text-secondary);text-align:center;line-height:1.7}
 
-  /* ---- FAQ ---- */
-  .faq-list{margin-top:32px;}
-  .faq-item{border-top:1px solid var(--line); padding:24px 0;}
-  .faq-item:last-child{border-bottom:1px solid var(--line);}
-  .faq-q{font-size:17px; font-weight:700; color:var(--ink); margin-bottom:10px;}
-  .faq-q::before{content:"Q. ";}
-  .faq-a{font-size:16px; color:var(--ink-soft); line-height:1.7;}
-  .faq-a::before{content:"A. "; color:var(--ink-soft);}
-  .faq-a b{color:var(--accent); font-weight:700;}
+  /* 배너 창: 가로로 긴 썸네일이라 왼쪽 목록 폭만 넓게 */
+  .pf-wide .thumbs{width:210px;flex-basis:210px}
+  .pf-wide .thumb{width:186px}
+  .pf-wide .thumb .t-img{aspect-ratio:5/2;background:#f2f2f4}
+  .pf-wide .thumb .t-img img{object-fit:contain}
 
-  /* ---- FOOTER ---- */
-  footer{padding:56px 0; text-align:center; border-top:1px solid var(--line);}
-  footer .cmark{font-size:15px; letter-spacing:.06em; color:var(--ink); font-weight:700; margin-bottom:10px;}
-  footer p{font-size:14px; color:var(--ink-soft); line-height:1.8;}
+  /* 창 크기 조절 핸들 (PC 전용) */
+  .rz{position:absolute;z-index:30;touch-action:none}
+  .rz[data-dir=n]{top:0;left:14px;right:14px;height:6px;cursor:ns-resize}
+  .rz[data-dir=s]{bottom:0;left:14px;right:14px;height:6px;cursor:ns-resize}
+  .rz[data-dir=e]{right:0;top:14px;bottom:14px;width:6px;cursor:ew-resize}
+  .rz[data-dir=w]{left:0;top:14px;bottom:14px;width:6px;cursor:ew-resize}
+  .rz[data-dir=ne]{top:0;right:0;width:14px;height:14px;cursor:nesw-resize}
+  .rz[data-dir=nw]{top:0;left:0;width:14px;height:14px;cursor:nwse-resize}
+  .rz[data-dir=se]{bottom:0;right:0;width:14px;height:14px;cursor:nwse-resize}
+  .rz[data-dir=sw]{bottom:0;left:0;width:14px;height:14px;cursor:nesw-resize}
 
-  @media(max-width:860px){
-    .cards{grid-template-columns:1fr;}
-    h2{font-size:26px;}
-    section{padding:72px 0;}
+  /* 창이 좁아지면 사이드바 자동 숨김 */
+  .win.narrow .sidebar{position:absolute;left:0;top:0;bottom:0;z-index:5;transform:translateX(-100%);transition:transform .22s ease;box-shadow:6px 0 16px rgba(0,0,0,.12)}
+  .win.narrow.sidebar-open .sidebar{transform:translateX(0)}
+  .win.narrow .content{--px:24px;--py:28px}
+
+  /* ───────── Dock ───────── */
+  .dock-wrap{
+    position:absolute;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));
+    display:flex;justify-content:center;pointer-events:none;z-index:950;
+  }
+  .dock{
+    pointer-events:auto;display:flex;align-items:flex-end;gap:6px;padding:0 10px 6px;height:78px;
+    background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.45);border-radius:22px;
+    -webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);
+    box-shadow:0 10px 30px rgba(0,0,0,.2);
+  }
+  .dock-item{
+    position:relative;border:0;background:transparent;padding:0 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-radius:10px;
+  }
+  .dock-item .icon{display:flex}
+  .dock-item .tile{width:var(--dock-base);height:var(--dock-base);display:block;filter:drop-shadow(0 3px 5px rgba(0,0,0,.25))}
+  .dock-item .dot{width:4px;height:4px;border-radius:50%;background:rgba(0,0,0,.6);opacity:0}
+  .dock-item.on .dot{opacity:1}
+  .dock-item::after{
+    content:attr(data-label);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);
+    background:rgba(40,40,44,.88);color:#fff;font-size:12px;font-weight:600;padding:4px 10px;border-radius:7px;white-space:nowrap;
+    opacity:0;pointer-events:none;transition:opacity .15s;
+  }
+  .dock-item:hover::after{opacity:1}
+  .dock-divider{width:1px;height:var(--dock-base);margin:0 5px 13px;background:rgba(0,0,0,.28);align-self:flex-end;flex:0 0 1px}
+  @keyframes hop{0%,100%{transform:translateY(0)}35%{transform:translateY(-22px)}60%{transform:translateY(0)}78%{transform:translateY(-8px)}}
+  @keyframes bounce{0%,100%{transform:translateY(0);animation-timing-function:ease-in-out}50%{transform:translateY(-40px)}}
+  .dock-item.hint .icon{animation:hop .9s ease calc(1.4s + var(--d,0s)) 2}
+  .dock-item .icon.bounce{animation:bounce .8s ease-in-out}
+
+  /* ───────── 모바일 ───────── */
+  @media (max-width:860px){
+    :root{--dock-reserve:92px;--dock-base:44px}
+    .win{left:0!important;top:calc(var(--menubar-h) + env(safe-area-inset-top,0px))!important;width:100%!important;height:calc(100% - var(--menubar-h) - var(--dock-reserve) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;border-radius:0}
+    .menubar .m{display:none}
+    .rz{display:none}
+    .dock{height:68px;gap:3px;padding:0 8px 5px}
+    .dock-divider{margin:0 3px 12px}
+    .dock-item::after{display:none}
+    .sidebar{position:absolute;left:0;top:0;bottom:0;z-index:5;transform:translateX(-100%);transition:transform .22s ease;box-shadow:6px 0 16px rgba(0,0,0,.12)}
+    .win.sidebar-open .sidebar{transform:translateX(0)}
+    .content{--px:20px;--py:24px;scroll-padding-top:92px}
+    .chips{display:flex;justify-content:center;gap:8px;position:sticky;top:calc(var(--py) * -1);z-index:3;margin:calc(var(--py) * -1) calc(var(--px) * -1) 18px;padding:8px 12px;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--divider)}
+    .pf .pv-body{flex-direction:column-reverse}
+    .pf .thumbs{width:100%;flex:0 0 auto;flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:8px 10px;justify-content:flex-start;align-items:flex-start;border-right:0;border-top:1px solid rgba(0,0,0,.1);gap:4px}
+    .pf .thumb{width:68px;padding:5px 5px 4px}
+    .pf.pf-wide .thumb{width:130px}
+    .canvas{padding:16px}
+    .pf .inquire{display:none}
+    .pv-sub{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .sidebar{transition:none}
+    .dock-item.hint .icon,.dock-item .icon.bounce{animation:none}
   }
 </style>
-</head>
-<body>
 
-<!-- PRODUCT CARDS -->
-<section>
-  <div class="wrap">
-    <div class="eyebrow">LINE-UP</div>
-    <h2>상품 구성</h2>
-    <p class="lead">현재 작업중인 상품 모델은 3가지입니다.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="fg-back" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2F9BF0"/><stop offset="1" stop-color="#1F86E0"/></linearGradient>
+    <linearGradient id="fg-front" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6ACBFC"/><stop offset="1" stop-color="#2D9CF3"/></linearGradient>
+  </defs>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2.5h7.5A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6.5 3h7L18 7.5V19a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M13.5 3v4.5H18M8 12h7M8 15.5h7"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 3.5 3L15 13l5 4.5"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v6a2.5 2.5 0 0 1-2.5 2.5H11l-4 3.5V15h-.5A2.5 2.5 0 0 1 5 12.5z"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.2-1.8h5.6L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M8 16L16 8M9.5 8H16v6.5"/></symbol>
+  <symbol id="i-sidebar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="3"/><path d="M9.5 5v14"/></symbol>
+  <symbol id="i-zoomin" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5M10.5 8v5M8 10.5h5"/></symbol>
+  <symbol id="i-zoomout" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5M8 10.5h5"/></symbol>
+</svg>
 
-    <div class="cards">
-      <div class="card">
-        <div class="tag">Single</div>
-        <h3>원페이지 포스터</h3>
-        <div class="price">70,000<small>원</small></div>
-        <ul>
-          <li>단일 포스터 디자인</li>
-          <li>900×1200px(3:4 비율)</li>
-          <li>데뷔, 역팬, 생일 및 이벤트</li>
-        </ul>
+<div class="desktop" id="desktop">
+
+  <div class="menubar">
+    <span class="app" id="menuApp">UNNNYY</span>
+    <span class="m">파일</span><span class="m">보기</span><span class="m">윈도우</span><span class="m">도움말</span>
+    <span class="spacer"></span>
+    <span class="clock" id="clock"></span>
+  </div>
+
+  <!-- Finder 창 -->
+  <div class="win" id="win-finder" data-app="Finder" role="dialog" aria-label="Finder">
+    <div class="titlebar">
+      <div class="traffic">
+        <button class="red" data-act="close" aria-label="닫기"></button>
+        <button class="yellow" data-act="min" aria-label="최소화"></button>
+        <button class="green" data-act="zoom" aria-label="확대"></button>
+      </div>
+      <button class="tb-btn" id="sidebarToggle" aria-label="사이드바"><svg class="i"><use href="#i-sidebar"/></svg></button>
+      <div class="titlebar-title">Finder</div>
+    </div>
+    <div class="f-body">
+      <div class="sidebar">
+        <div class="folder-group">
+          <div class="folder-label"><svg class="i"><use href="#i-folder"/></svg>원페이지 포스터</div>
+          <ul class="sub-list">
+            <li><button class="sub-item active" data-scroll="sec-poster"><svg class="i"><use href="#i-doc"/></svg>상품 설명</button></li>
+            <li><button class="sub-item" data-open="poster"><svg class="i"><use href="#i-image"/></svg>포트폴리오<svg class="i go"><use href="#i-arrow"/></svg></button></li>
+            <li><button class="sub-item" data-open="message" data-product="poster"><svg class="i"><use href="#i-message"/></svg>문의 작성<svg class="i go"><use href="#i-arrow"/></svg></button></li>
+          </ul>
+        </div>
+        <div class="folder-group">
+          <div class="folder-label"><svg class="i"><use href="#i-folder"/></svg>룩북 패키지</div>
+          <ul class="sub-list">
+            <li><button class="sub-item" data-scroll="sec-lookbook"><svg class="i"><use href="#i-doc"/></svg>상품 설명</button></li>
+            <li><button class="sub-item" data-open="lookbook"><svg class="i"><use href="#i-image"/></svg>포트폴리오<svg class="i go"><use href="#i-arrow"/></svg></button></li>
+            <li><button class="sub-item" data-open="message" data-product="lookbook"><svg class="i"><use href="#i-message"/></svg>문의 작성<svg class="i go"><use href="#i-arrow"/></svg></button></li>
+          </ul>
+        </div>
+        <div class="folder-group">
+          <div class="folder-label"><svg class="i"><use href="#i-folder"/></svg>배너 풀패키지</div>
+          <ul class="sub-list">
+            <li><button class="sub-item" data-scroll="sec-banner"><svg class="i"><use href="#i-doc"/></svg>상품 설명</button></li>
+            <li><button class="sub-item" data-open="banner"><svg class="i"><use href="#i-image"/></svg>포트폴리오<svg class="i go"><use href="#i-arrow"/></svg></button></li>
+            <li><button class="sub-item" data-open="message" data-product="banner"><svg class="i"><use href="#i-message"/></svg>문의 작성<svg class="i go"><use href="#i-arrow"/></svg></button></li>
+          </ul>
+        </div>
       </div>
 
-      <div class="card featured">
-        <span class="badge">BEST</span>
-        <div class="tag">Lookbook</div>
-        <h3>룩북 패키지</h3>
-        <div class="price">110,000<small>원</small></div>
-        <ul>
-          <li>총 4장 고정 구성 디자인</li>
-          <li>룰렛, API 보상 안내용으로 적합</li>
-          <li>구성 변경 시 사전 협의 필요</li>
-        </ul>
-      </div>
+      <div class="content" id="content">
+        <div class="chips" aria-label="상품 바로가기">
+          <button class="chip active" data-scroll="sec-poster"><span class="fi-wrap"><svg class="fi" viewBox="0 0 64 54" aria-hidden="true"><path d="M4 9a5 5 0 0 1 5-5h14l5 5h27a5 5 0 0 1 5 5v31a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-back)"/><path d="M4 18a5 5 0 0 1 5-5h46a5 5 0 0 1 5 5v27a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-front)"/></svg></span><span class="lb">Poster</span></button>
+          <button class="chip" data-scroll="sec-lookbook"><span class="fi-wrap"><svg class="fi" viewBox="0 0 64 54" aria-hidden="true"><path d="M4 9a5 5 0 0 1 5-5h14l5 5h27a5 5 0 0 1 5 5v31a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-back)"/><path d="M4 18a5 5 0 0 1 5-5h46a5 5 0 0 1 5 5v27a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-front)"/></svg></span><span class="lb">Lookbook</span></button>
+          <button class="chip" data-scroll="sec-banner"><span class="fi-wrap"><svg class="fi" viewBox="0 0 64 54" aria-hidden="true"><path d="M4 9a5 5 0 0 1 5-5h14l5 5h27a5 5 0 0 1 5 5v31a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-back)"/><path d="M4 18a5 5 0 0 1 5-5h46a5 5 0 0 1 5 5v27a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-front)"/></svg></span><span class="lb">Banner</span></button>
+        </div>
 
-      <div class="card" style="position:relative;">
-        <span class="badge" style="background:var(--accent);">HOT</span>
-        <div class="tag">Banner Set</div>
-        <h3>배너 풀패키지</h3>
-        <div class="price">110,000<small>원</small></div>
-        <ul>
-          <li>SOOP 플랫폼 전용</li>
-          <li>상단배너·플로팅·하단배너 6단 구성</li>
-          <li>패키지로만 판매(단일 옵션 구매 불가)</li>
-        </ul>
+        <section class="doc-sec" id="sec-poster">
+          <div class="crumb">01 · One-page Poster</div>
+          <h1 class="page-title">원페이지 포스터</h1>
+          <p class="lead">상세한 내용을 담기보다, 그래픽에 집중한 원페이지 포스터입니다.<br>데뷔나 생일, 역팬데이, 오리지널 아바타 공개 등 중요한 이벤트 라이브를 위해 제작됩니다.</p>
+          <div class="ex-grid"><figure class="ex " data-ex="poster-1"><div class="ph"><span>데뷔</span></div><figcaption>데뷔</figcaption></figure><figure class="ex " data-ex="poster-2"><div class="ph"><span>아바타 공개</span></div><figcaption>아바타 공개</figcaption></figure><figure class="ex " data-ex="poster-3"><div class="ph"><span>역팬데이</span></div><figcaption>역팬데이</figcaption></figure><figure class="ex " data-ex="poster-4"><div class="ph"><span>기념일</span></div><figcaption>기념일</figcaption></figure></div>
+          <div class="sec-actions">
+            <button class="btn secondary" type="button" data-open="poster">포트폴리오 보기</button>
+            <button class="btn primary" type="button" data-open="message" data-product="poster">문의하기</button>
+          </div>
+        </section>
+
+        <section class="doc-sec" id="sec-lookbook">
+          <div class="crumb">02 · Lookbook Package</div>
+          <h1 class="page-title">룩북 패키지</h1>
+          <p class="lead">룰렛 보상이나 API 보상 안내를 목적으로 만들어지는 시리즈 이미지입니다.<br>여러가지 의상과 헤어, 확정 구매 또는 API 달성 공약을 포함한 상세 페이지가 필요할 때 룩북 패키지를 추천합니다.</p>
+          <div class="ex-grid"><figure class="ex " data-ex="lookbook-1"><div class="ph"><span>메인 비주얼</span></div><figcaption>메인 비주얼</figcaption></figure><figure class="ex " data-ex="lookbook-2"><div class="ph"><span>의상 안내</span></div><figcaption>의상 안내</figcaption></figure><figure class="ex " data-ex="lookbook-3"><div class="ph"><span>헤어 안내</span></div><figcaption>헤어 안내</figcaption></figure><figure class="ex " data-ex="lookbook-4"><div class="ph"><span>보상 안내</span></div><figcaption>보상 안내</figcaption></figure></div>
+          <p class="note">위 4장 구성이 기본이며, 변경 시 사전 협의가 필요합니다.<br>페이지 추가 시 장당 추가금이 발생합니다. (이때 베이스 디자인은 다른 페이지와 동일합니다.)<br>사전 협의 시, '렌즈 선택'을 넣어 달라고 말씀해 주시면 추가금 없이 상대적으로 구성이 적은 페이지에 함께 넣어 드릴 수도 있습니다.</p>
+          <div class="sec-actions">
+            <button class="btn secondary" type="button" data-open="lookbook">포트폴리오 보기</button>
+            <button class="btn primary" type="button" data-open="message" data-product="lookbook">문의하기</button>
+          </div>
+        </section>
+
+        <section class="doc-sec" id="sec-banner">
+          <div class="crumb">03 · Banner Full Package</div>
+          <h1 class="page-title">배너 풀패키지</h1>
+          <p class="lead">SOOP 방송국 상단 배너, 플로팅 배너, 하단 배너 6단 패키지 디자인입니다.<br>패키지로만 작업하며, 단일 옵션만 구매하는 것은 불가능합니다.</p>
+          <div class="bn-wrap">
+            <figure class="ex bn-top" data-ex="banner-top"><div class="ph"><span>상단 배너</span></div><figcaption>상단 배너</figcaption></figure>
+            <div class="bn-row">
+              <figure class="ex bn-bot" data-ex="banner-bot"><div class="ph"><span>하단 배너</span></div><figcaption>하단 배너</figcaption></figure>
+              <figure class="ex bn-float" data-ex="banner-float"><div class="ph"><span>플로팅</span></div><figcaption>플로팅</figcaption></figure>
+            </div>
+          </div>
+          <div class="sec-actions">
+            <button class="btn secondary" type="button" data-open="banner">포트폴리오 보기</button>
+            <button class="btn primary" type="button" data-open="message" data-product="banner">문의하기</button>
+          </div>
+        </section>
+
+        <div id="docSpacer" aria-hidden="true"></div>
       </div>
     </div>
   </div>
-</section>
 
-<!-- 원페이지 포스터 -->
-<section class="section-soft product-detail" id="onepage">
-  <div class="wrap">
-    <div class="eyebrow">01 · SINGLE</div>
-    <h2 class="product-head">원페이지 포스터</h2>
-    <p class="lead">상세한 내용을 담기보다, 그래픽에 집중한 원페이지 포스터입니다.<br>데뷔나 생일, 역팬데이, 오리지널 아바타 공개 등 중요한 이벤트 라이브를 위해 제작됩니다.</p>
-
-    <div class="scroll-carousel">
-      <div class="carousel-nav">
-        <button data-carousel-prev="onepage-track">‹</button>
-        <button data-carousel-next="onepage-track">›</button>
+  
+<!-- 문의 작성 창 -->
+  <div class="win" id="win-message" data-app="Messages" role="dialog" aria-label="Message">
+    <div class="titlebar">
+      <div class="traffic">
+        <button class="red" data-act="close" aria-label="닫기"></button>
+        <button class="yellow" data-act="min" aria-label="최소화"></button>
+        <button class="green" data-act="zoom" aria-label="확대"></button>
       </div>
-      <div class="track" id="onepage-track">
-        <!-- 12 samples -->
-        <div class="slide" style="padding:0;"><img src="assets/onepage-01.png" alt="원페이지 샘플 01" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
-        <div class="slide" style="padding:0;"><img src="assets/onepage-02.png" alt="원페이지 샘플 02" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
-        <div class="slide" style="padding:0;"><img src="assets/onepage-03.png" alt="원페이지 샘플 03" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
-        <div class="slide" style="padding:0;"><img src="assets/onepage-04.png" alt="원페이지 샘플 04" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
-        <div class="slide" style="padding:0;"><img src="assets/onepage-05.png" alt="원페이지 샘플 05" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
-        <div class="slide" style="padding:0;"><img src="assets/onepage-06.png" alt="원페이지 샘플 06" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
-        <div class="slide" style="padding:0;"><img src="assets/onepage-07.png" alt="원페이지 샘플 07" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
-        <div class="slide" style="padding:0;"><img src="assets/onepage-08.png" alt="원페이지 샘플 08" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
-        <div class="slide" style="padding:0;"><img src="assets/onepage-09.png" alt="원페이지 샘플 09" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
-        <div class="slide" style="padding:0;"><img src="assets/onepage-10.png" alt="원페이지 샘플 10" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
-        <div class="slide" style="padding:0;"><img src="assets/onepage-11.png" alt="원페이지 샘플 11" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
-        <div class="slide" style="padding:0;"><img src="assets/onepage-12.png" alt="원페이지 샘플 12" style="width:100%; height:100%; object-fit:cover; border-radius:14px;"></div>
+      <button class="tb-btn" id="mListToggle" aria-label="상품 목록"><svg class="i"><use href="#i-sidebar"/></svg></button>
+      <div class="titlebar-title">Message</div>
+    </div>
+    <div class="m-body">
+      <div class="sidebar" id="mList">
+        <div class="m-list-head">상품 선택</div>
+        <button class="m-item active" data-product="poster"><span class="m-av" style="background:linear-gradient(160deg,#FFB36B,#FF7A45)">포</span><span class="m-txt"><span class="m-name">원페이지 포스터</span><span class="m-sub">한 장</span></span></button>
+        <button class="m-item" data-product="lookbook"><span class="m-av" style="background:linear-gradient(160deg,#B38BFF,#7A5CFA)">룩</span><span class="m-txt"><span class="m-name">룩북 패키지</span><span class="m-sub">4장</span></span></button>
+        <button class="m-item" data-product="banner"><span class="m-av" style="background:linear-gradient(160deg,#5ED9CC,#0EA5A0)">배</span><span class="m-txt"><span class="m-name">배너 풀패키지</span><span class="m-sub">풀세트</span></span></button>
+      </div>
+      <div class="content" id="mContent">
+        <div class="chips m-chips" aria-label="상품 선택">
+          <button class="chip active" data-product="poster"><span class="fi-wrap"><svg class="fi" viewBox="0 0 64 54" aria-hidden="true"><path d="M4 9a5 5 0 0 1 5-5h14l5 5h27a5 5 0 0 1 5 5v31a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-back)"/><path d="M4 18a5 5 0 0 1 5-5h46a5 5 0 0 1 5 5v27a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-front)"/></svg></span><span class="lb">Poster</span></button>
+          <button class="chip" data-product="lookbook"><span class="fi-wrap"><svg class="fi" viewBox="0 0 64 54" aria-hidden="true"><path d="M4 9a5 5 0 0 1 5-5h14l5 5h27a5 5 0 0 1 5 5v31a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-back)"/><path d="M4 18a5 5 0 0 1 5-5h46a5 5 0 0 1 5 5v27a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-front)"/></svg></span><span class="lb">Lookbook</span></button>
+          <button class="chip" data-product="banner"><span class="fi-wrap"><svg class="fi" viewBox="0 0 64 54" aria-hidden="true"><path d="M4 9a5 5 0 0 1 5-5h14l5 5h27a5 5 0 0 1 5 5v31a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-back)"/><path d="M4 18a5 5 0 0 1 5-5h46a5 5 0 0 1 5 5v27a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="url(#fg-front)"/></svg></span><span class="lb">Banner</span></button>
+        </div>
+        <section data-product="poster" data-form data-title="원페이지 포스터 신청">
+          <div class="crumb">문의 작성</div>
+          <h1 class="page-title">원페이지 포스터</h1>
+                    <div class="field"><label for="p1">1. 스트리머 영문명 <span class="req">*</span></label><div class="hint">디자인에 영문을 주로 사용하기에 요청합니다.</div><input id="p1" type="text" placeholder="unnnyy" data-q="스트리머 영문명" data-req></div>
+          <div class="field"><label for="p2">2. 방송국 주소 <span class="req">*</span></label><div class="hint">아바타 외형 확인과 전체적인 디자인 무드를 잡는 데 참고하기 위함입니다. 문의 단계에서 비공개를 원하시면 '비공개'라고 입력하셔도 좋습니다.</div><input id="p2" type="text" placeholder="https://..." data-q="방송국 주소" data-req></div>
+          <div class="field"><label for="p3">3. 원하는 포스터 테마 <span class="req">*</span></label><div class="hint">원하는 포스터 테마를 기입해 주세요.</div><input id="p3" type="text" placeholder="데뷔, 생일, 역팬데이, 오리지널 아바타 공개 등" data-q="원하는 포스터 테마" data-req></div>
+          <div class="field"><label for="p4">4. 원하는 마감 기한 <span class="req">*</span></label><div class="hint">결제 및 자료 전달일 기준 평균 7일 이내로 완료되고 있으나, 마감일은 작업 내용에 따라 달라질 수 있기에 문의를 통해 정확한 마감 일정 가능 여부를 확인해 드리겠습니다.</div><input id="p4" type="text" placeholder="OO월 OO일까지" data-q="원하는 마감 기한" data-req></div>
+          <div class="field"><label for="p5">5. 포스터에 들어가야 할 텍스트 <span class="req">*</span></label><div class="hint">이벤트 날짜, 이벤트 타이틀, 이벤트 내용 등 포스터에 들어가야 할 텍스트를 적어 주세요.</div><textarea id="p5" placeholder="ex) 12월 15일, 역팬데이, 3가지 시그풍에 대한 확정 보상 내용" data-q="포스터에 들어가야 할 텍스트" data-req></textarea></div>
+          <div class="field"><label for="p6">6. 요청 사항</label><div class="hint">오마카세 형태로 작업하는 것을 좋아합니다. 원하는 특정 컨셉이 있다거나, 반드시 추가해야 하는 내용이 있다면 사전에 말씀해 주세요.</div><textarea id="p6" placeholder="ex) 오마카세로 해주세요, 외계인 컨셉으로 해주세요, 최대한 심플하게 작업해주세요, 팬캐릭터 넣어주세요 등" data-q="요청 사항"></textarea></div>
+                    <div class="checks">
+            <div class="checks-title">문의 전 확인해 주세요</div>
+            <div class="checks-desc">전부 켜야 신청 양식 복사 버튼이 활성화됩니다.</div>
+            <label class="sw-row"><span class="tx">사진 촬영 시 반드시 고화질, 투명 배경으로 촬영해 주셔야 합니다.</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">포스터의 경우 상반신 3컷 이상 촬영해서 보내 주시면 됩니다. (오리지널 아바타 공개처럼 실루엣 처리가 필요한 경우에는 전신 2컷, 상반신 1컷)</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">상반신, 전신, 얼빡 등 3컷 외 추가 촬영 컷을 보내 주시면 디자인에 더 잘 어울리는 컷을 사용하기 때문에 더 좋은 결과물이 나올 수 있습니다. (강제하지는 않습니다)</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">사진 파일이 5개 이상이면 하나의 폴더에 사진을 모두 넣은 다음, 그 폴더를 압축해 첨부해 주세요.</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+          </div>
+          <button class="copy-btn" type="button" disabled>신청양식 복사하기</button>
+          <div class="copy-msg" role="status"></div>
+        </section>
+        <section data-product="lookbook" hidden data-form data-title="룩북 패키지 신청">
+          <div class="crumb">문의 작성</div>
+          <h1 class="page-title">룩북 패키지</h1>
+          <div class="field"><label for="l1">1. 스트리머 영문명 <span class="req">*</span></label><div class="hint">디자인에 영문을 주로 사용하기에 요청합니다.</div><input type="text" id="l1" placeholder="unnnyy" data-q="스트리머 영문명" data-req></div>
+          <div class="field"><label for="l2">2. 방송국 주소 <span class="req">*</span></label><div class="hint">아바타 외형 확인과 전체적인 디자인 무드를 잡는 데 참고하기 위함입니다. 문의 단계에서 비공개를 원하시면 '비공개'라고 입력하셔도 좋습니다.</div><input type="text" id="l2" placeholder="https://..." data-q="방송국 주소" data-req></div>
+          <div class="field"><label for="l3">3. 룩북 패키지 타이틀 <span class="req">*</span></label><div class="hint">메인 비주얼 타이틀로 들어갈 룩북 패키지의 타이틀을 입력해 주세요.</div><input type="text" id="l3" placeholder="ex) 12월 룰렛, 충동서버 API 등" data-q="룩북 패키지 타이틀" data-req></div>
+          <div class="field"><label for="l4">4. 원하는 마감 기한 <span class="req">*</span></label><div class="hint">결제 및 자료 전달일 기준 평균 7일 이내로 완료되고 있으나, 마감일은 작업 내용에 따라 달라질 수 있기에 문의를 통해 정확한 마감 일정 가능 여부를 확인해 드리겠습니다.</div><input type="text" id="l4" placeholder="" data-q="원하는 마감 기한" data-req></div>
+          <div class="field"><label for="l5">5. 이벤트 진행 기간</label><div class="hint">패키지에 해당하는 이벤트 진행 기간을 입력해 주세요.</div><input type="text" id="l5" placeholder="" data-q="이벤트 진행 기간"></div>
+          <div class="field"><label for="l6">6. 의상 개수 <span class="req">*</span></label><div class="hint">8가지 또는 3의 배수일 때 가장 보기 좋습니다.</div><input type="text" id="l6" placeholder="" data-q="의상 개수" data-req></div>
+          <div class="field"><label for="l7">7. 헤어 개수</label><div class="hint">9가지 또는 4의 배수일 때 가장 보기 좋습니다.</div><input type="text" id="l7" placeholder="" data-q="헤어 개수"></div>
+          <div class="field"><label for="l8">8. 패키지에 들어가야 할 텍스트</label><div class="hint">확정 보상 안내, 순위 보상 안내 등 패키지에 들어가야 할 텍스트를 적어 주세요.</div><textarea id="l8" placeholder="추후 전달을 원하시면 결제 후 전달해 주셔도 좋습니다." data-q="패키지에 들어가야 할 텍스트"></textarea></div>
+          <div class="field"><label for="l9">9. 요청 사항</label><div class="hint">오마카세 형태로 작업하는 것을 좋아합니다. 원하는 특정 컨셉이 있다거나, 반드시 추가해야 하는 내용이 있다면 사전에 말씀해 주세요.</div><textarea id="l9" placeholder="ex) 오마카세로 해주세요, 렌즈 선택도 넣어 주세요, 레트로 컨셉으로 해주세요 등" data-q="요청 사항"></textarea></div>
+          <div class="checks">
+            <div class="checks-title">문의 전 확인해 주세요</div>
+            <div class="checks-desc">전부 켜야 신청 양식 복사 버튼이 활성화됩니다.</div>
+            <label class="sw-row"><span class="tx">사진 촬영 시 반드시 고화질, 투명 배경으로 촬영해 주셔야 합니다.</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">메인 비주얼(첫 페이지)에 들어갈 상반신 3컷 이상, 각 의상마다 전신 1컷, 각 헤어마다 상반신 1컷(헤어 윗부분·좌우 잘리지 않게) 촬영해 주셔야 합니다.</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">외 추가 촬영 컷을 보내 주시면 디자인에 더 잘 어울리는 컷을 사용하기 때문에 더 좋은 결과물이 나올 수 있습니다. (강제하지는 않습니다)</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">시그니처 풍선 이미지를 패키지에 그대로 활용하고 싶으시다면 함께 보내주세요. 다만 시그니처 풍선 이미지들의 컬러가 너무 따로 놀면 디자인 밸런스가 깨져 미감을 해칠 수 있다는 점 인지 바랍니다.</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">작업에 필요한 이미지들을 하나의 폴더에 모두 넣은 다음, 그 폴더를 압축해 첨부해 주세요.</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">패키지는 4장 구성이 기본이며, 변경 시 사전 협의가 필요합니다. 페이지 추가 시 장당 추가금이 발생합니다.</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+          </div>
+          <button class="copy-btn" type="button" disabled>신청양식 복사하기</button>
+          <div class="copy-msg" role="status"></div>
+        </section>
+        <section data-product="banner" hidden data-form data-title="배너 풀패키지 신청">
+          <div class="crumb">문의 작성</div>
+          <h1 class="page-title">배너 풀패키지</h1>
+          <div class="field"><label for="b1">1. 스트리머 영문명 <span class="req">*</span></label><div class="hint">디자인에 영문을 주로 사용하기에 요청합니다.</div><input type="text" id="b1" placeholder="unnnyy" data-q="스트리머 영문명" data-req></div>
+          <div class="field"><label for="b2">2. 방송국 주소 <span class="req">*</span></label><div class="hint">아바타 외형 확인과 전체적인 디자인 무드를 잡는 데 참고하기 위함입니다. 문의 단계에서 비공개를 원하시면 '비공개'라고 입력하셔도 좋습니다.</div><input type="text" id="b2" placeholder="https://..." data-q="방송국 주소" data-req></div>
+          <div class="field"><label for="b3">3. 시청자 애칭 및 영문명 <span class="req">*</span></label><div class="hint">디자인에 영문을 주로 사용하기에 요청합니다. 정확하지 않으면 SOOP 계정이라도 적어 주세요.</div><input type="text" id="b3" placeholder="언니(unnnyy)" data-q="시청자 애칭 및 영문명" data-req></div>
+          <div class="field"><label for="b4">4. 원하는 마감 기한 <span class="req">*</span></label><div class="hint">결제 및 자료 전달일 기준 평균 7일 이내로 완료되고 있으나, 마감일은 작업 내용에 따라 달라질 수 있기에 문의를 통해 정확한 마감 일정 가능 여부를 확인해 드리겠습니다.</div><input type="text" id="b4" placeholder="" data-q="원하는 마감 기한" data-req></div>
+          <div class="field"><label for="b5">5. 요청 사항</label><div class="hint">오마카세 형태로 작업하는 것을 좋아합니다. 원하는 특정 컨셉이 있다거나, 반드시 추가해야 하는 내용이 있다면 사전에 말씀해 주세요. 따로 없다면 아바타 의상과 가장 잘 어울리는 디자인으로 작업을 진행합니다.</div><textarea id="b5" placeholder="ex) 오마카세로 해주세요, 특정 문구를 꼭 넣어주세요 등" data-q="요청 사항"></textarea></div>
+          <div class="checks">
+            <div class="checks-title">문의 전 확인해 주세요</div>
+            <div class="checks-desc">전부 켜야 신청 양식 복사 버튼이 활성화됩니다.</div>
+            <label class="sw-row"><span class="tx">사진 촬영 시 반드시 고화질, 투명 배경으로 촬영해 주셔야 합니다.</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">패키지당 상반신 8컷, 전신 3컷, 얼빡 5컷 이상 촬영해 주셔야 합니다.</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">외 추가 촬영 컷을 보내 주시면 디자인에 더 잘 어울리는 컷을 사용하기 때문에 더 좋은 결과물이 나올 수 있습니다. (강제하지는 않습니다)</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">다수의 패키지를 신청할 시 패키지마다 다른 의상 및 헤어로 사진 촬영하는 것을 권장합니다. 훨씬 다채로운 느낌이 듭니다.</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+            <label class="sw-row"><span class="tx">작업에 필요한 이미지들을 하나의 폴더에 모두 넣은 다음, 그 폴더를 압축해 첨부해 주세요.</span><input type="checkbox" role="switch" data-chk><span class="sw" aria-hidden="true"></span></label>
+          </div>
+          <button class="copy-btn" type="button" disabled>신청양식 복사하기</button>
+          <div class="copy-msg" role="status"></div>
+        </section>
       </div>
     </div>
   </div>
-</section>
 
-<!-- 룩북 패키지 -->
-<section class="product-detail" id="lookbook">
-  <div class="wrap">
-    <div class="eyebrow">02 · LOOKBOOK</div>
-    <h2 class="product-head">룩북 패키지</h2>
-    <p class="lead">룰렛 보상이나 API 보상 안내를 목적으로 만들어지는 시리즈 이미지입니다.<br>여러가지 의상과 헤어, 확정 구매 또는 API 달성 공약을 포함한 상세 페이지가 필요할 때 룩북 패키지를 추천합니다.</p>
+  
+<!-- Dock -->
+  <div class="dock-wrap">
+    <div class="dock" id="dock" role="toolbar" aria-label="Dock">
+      <button class="dock-item on" data-win="finder" data-label="Finder" aria-label="Finder">
+        <span class="icon"><img class="tile" src="assets/icons/finder.png" alt="" draggable="false"></span><span class="dot"></span>
+      </button>
 
-    <div class="paged-carousel" style="margin-top:36px;">
-      <div class="carousel-nav">
-        <span class="page-indicator" id="lookbook-indicator">1 / 2</span>
-        <button data-pages-prev="lookbook-pages">‹</button>
-        <button data-pages-next="lookbook-pages">›</button>
-      </div>
-      <div id="lookbook-pages">
-        <div class="page-grid active">
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-01.png" alt="커버" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">01</span>메인 비주얼</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-02.png" alt="의상" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">02</span>의상 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-03.png" alt="헤어" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">03</span>헤어 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-04.png" alt="확정안내" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">04</span>보상 안내</div>
-          </div>
-        </div>
-        <div class="page-grid">
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-05.png" alt="커버" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">01</span>메인 비주얼</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-06.png" alt="의상" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">02</span>의상 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-07.png" alt="헤어" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">03</span>헤어 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-08.png" alt="확정안내" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">04</span>보상 안내</div>
-          </div>
-        </div>
-        <div class="page-grid">
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-09.png" alt="커버" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">01</span>메인 비주얼</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-10.png" alt="의상" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">02</span>의상 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-11.png" alt="헤어" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">03</span>헤어 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-12.png" alt="확정안내" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">04</span>보상 안내</div>
-          </div>
-        </div>
-        <div class="page-grid">
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-13.png" alt="커버" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">01</span>메인 비주얼</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-14.gif" alt="의상" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">02</span>의상 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-15.png" alt="헤어" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">03</span>헤어 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-16.png" alt="확정안내" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">04</span>보상 안내</div>
-          </div>
-        </div>
-        <div class="page-grid">
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-17.png" alt="커버" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">01</span>메인 비주얼</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-18.png" alt="의상" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">02</span>의상 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-19.png" alt="헤어" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">03</span>헤어 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-20.png" alt="확정안내" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">04</span>보상 안내</div>
-          </div>
-        </div>
-        <div class="page-grid">
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-21.png" alt="커버" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">01</span>메인 비주얼</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-22.png" alt="의상" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">02</span>의상 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-23.png" alt="헤어" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">03</span>헤어 안내</div>
-          </div>
-          <div class="lookbook-card">
-            <div class="g-item" style="padding:0; overflow:hidden;"><img src="assets/lookbook-24.png" alt="확정안내" style="width:100%; height:100%; object-fit:cover;"></div>
-            <div class="g-caption"><span class="caption-num">04</span>보상 안내</div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <div class="dock-divider" aria-hidden="true"></div>
 
-    <div class="note-box">
-      위 4장 구성이 기본이며, 변경 시 사전 협의가 필요합니다.<br>
-      페이지 추가 시 장당 추가금이 발생합니다. (이때 베이스 디자인은 다른 페이지와 동일합니다.)<br>
-      사전 협의 시, '렌즈 선택'을 넣어 달라고 말씀해 주시면 추가금 없이 상대적으로 구성이 적은 페이지에 함께 넣어 드릴 수도 있습니다.
+      <button class="dock-item hint" style="--d:0s" data-win="poster" data-label="Poster" aria-label="Poster">
+        <span class="icon"><img class="tile" src="assets/icons/portfolio-poster.png" alt="" draggable="false"></span><span class="dot"></span>
+      </button>
+      <button class="dock-item hint" style="--d:.15s" data-win="lookbook" data-label="Lookbook" aria-label="Lookbook">
+        <span class="icon"><img class="tile" src="assets/icons/portfolio-lookbook.png" alt="" draggable="false"></span><span class="dot"></span>
+      </button>
+      <button class="dock-item hint" style="--d:.3s" data-win="banner" data-label="Banner" aria-label="Banner">
+        <span class="icon"><img class="tile" src="assets/icons/portfolio-banner.png" alt="" draggable="false"></span><span class="dot"></span>
+      </button>
+
+      <div class="dock-divider" aria-hidden="true"></div>
+
+      <button class="dock-item" data-win="message" data-label="Message" aria-label="Message">
+        <span class="icon"><img class="tile" src="assets/icons/message.png" alt="" draggable="false"></span><span class="dot"></span>
+      </button>
     </div>
   </div>
-</section>
-
-<!-- 배너 풀패키지 -->
-<section class="section-soft product-detail" id="banner">
-  <div class="wrap">
-    <div class="eyebrow">03 · BANNER SET</div>
-    <h2 class="product-head">배너 풀패키지</h2>
-    <p class="lead">SOOP 방송국 상단 배너, 플로팅 배너, 하단 배너 6단 패키지 디자인입니다.<br>패키지로만 작업하며, 단일 옵션만 구매하는 것은 불가능합니다.</p>
-
-    <div class="banner-carousel">
-      <div class="carousel-nav">
-        <span class="page-indicator" id="banner-indicator">1 / 3</span>
-        <button data-pages-prev="banner-pages">‹</button>
-        <button data-pages-next="banner-pages">›</button>
-      </div>
-      <div id="banner-pages">
-        <div class="banner-page active">
-          <div class="banner-grid">
-            <div class="b-top"><img src="assets/banner-01-top.png" alt="상단배너"></div>
-            <div class="b-bottom"><img src="assets/banner-01-bot.gif" alt="하단배너 6단"></div>
-            <div class="b-float"><img src="assets/banner-01-float.gif" alt="플로팅배너"></div>
-          </div>
-        </div>
-        <div class="banner-page">
-          <div class="banner-grid">
-            <div class="b-top"><img src="assets/banner-02-top.png" alt="상단배너"></div>
-            <div class="b-bottom"><img src="assets/banner-02-bot.gif" alt="하단배너 6단"></div>
-            <div class="b-float"><img src="assets/banner-02-float.gif" alt="플로팅배너"></div>
-          </div>
-        </div>
-        <div class="banner-page">
-          <div class="banner-grid">
-            <div class="b-top"><img src="assets/banner-03-top.png" alt="상단배너"></div>
-            <div class="b-bottom"><img src="assets/banner-03-bot.gif" alt="하단배너 6단"></div>
-            <div class="b-float"><img src="assets/banner-03-float.gif" alt="플로팅배너"></div>
-          </div>
-        </div>
-        <div class="banner-page">
-          <div class="banner-grid">
-            <div class="b-top"><img src="assets/banner-04-top.png" alt="상단배너"></div>
-            <div class="b-bottom"><img src="assets/banner-04-bot.gif" alt="하단배너 6단"></div>
-            <div class="b-float"><img src="assets/banner-04-float.gif" alt="플로팅배너"></div>
-          </div>
-        </div>
-        <div class="banner-page">
-          <div class="banner-grid">
-            <div class="b-top"><img src="assets/banner-05-top.png" alt="상단배너"></div>
-            <div class="b-bottom"><img src="assets/banner-05-bot.gif" alt="하단배너 6단"></div>
-            <div class="b-float"><img src="assets/banner-05-float.gif" alt="플로팅배너"></div>
-          </div>
-        </div>
-        <div class="banner-page">
-          <div class="banner-grid">
-            <div class="b-top"><img src="assets/banner-06-top.png" alt="상단배너"></div>
-            <div class="b-bottom"><img src="assets/banner-06-bot.gif" alt="하단배너 6단"></div>
-            <div class="b-float"><img src="assets/banner-06-float.gif" alt="플로팅배너"></div>
-          </div>
-        </div>
-        <div class="banner-page">
-          <div class="banner-grid">
-            <div class="b-top"><img src="assets/banner-07-top.png" alt="상단배너"></div>
-            <div class="b-bottom"><img src="assets/banner-07-bot.gif" alt="하단배너 6단"></div>
-            <div class="b-float"><img src="assets/banner-07-float.gif" alt="플로팅배너"></div>
-          </div>
-        </div>
-        <div class="banner-page">
-          <div class="banner-grid">
-            <div class="b-top"><img src="assets/banner-08-top.png" alt="상단배너"></div>
-            <div class="b-bottom"><img src="assets/banner-08-bot.gif" alt="하단배너 6단"></div>
-            <div class="b-float"><img src="assets/banner-08-float.gif" alt="플로팅배너"></div>
-          </div>
-        </div>
-        <div class="banner-page">
-          <div class="banner-grid">
-            <div class="b-top"><img src="assets/banner-09-top.png" alt="상단배너"></div>
-            <div class="b-bottom"><img src="assets/banner-09-bot.gif" alt="하단배너 6단"></div>
-            <div class="b-float"><img src="assets/banner-09-float.gif" alt="플로팅배너"></div>
-          </div>
-        </div>
-        <div class="banner-page">
-          <div class="banner-grid">
-            <div class="b-top"><img src="assets/banner-10-top.png" alt="상단배너"></div>
-            <div class="b-bottom"><img src="assets/banner-10-bot.gif" alt="하단배너 6단"></div>
-            <div class="b-float"><img src="assets/banner-10-float.gif" alt="플로팅배너"></div>
-          </div>
-        </div>
-        <div class="banner-page">
-          <div class="banner-grid">
-            <div class="b-top"><img src="assets/banner-11-top.png" alt="상단배너"></div>
-            <div class="b-bottom"><img src="assets/banner-11-bot.gif" alt="하단배너 6단"></div>
-            <div class="b-float"><img src="assets/banner-11-float.gif" alt="플로팅배너"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="note-box">하단 배너 6단은 실제 적용 시 채도 차이가 있을 수 있습니다. (미리 보기 파일을 만드는 과정에서 채도가 낮아지는 경우)</div>
-  </div>
-</section>
-
-<!-- 자료 전달 가이드 -->
-<section class="product-detail" id="guide">
-  <div class="wrap">
-    <div class="eyebrow">GUIDE</div>
-    <h2>자료 전달 가이드</h2>
-    <p class="lead">사진을 촬영하기 전에 반드시 확인해 주세요.</p>
-
-    <div class="note-box">
-      1. 사진 촬영 시 반드시 고화질, 투명 배경으로 촬영해 주셔야 합니다. 아바타 화질이 깨지면 디자인이 아무리 좋아도 퀄리티가 낮아 보입니다.<br>
-      2. 하나의 폴더에 사진을 모두 넣은 다음, 그 폴더를 압축해 한번에 업로드해주세요.
-    </div>
-
-    <div class="guide-tabs">
-      <button class="guide-tab active" data-guide-tab="onepage-guide">원페이지 포스터</button>
-      <button class="guide-tab" data-guide-tab="lookbook-guide">룩북 패키지</button>
-      <button class="guide-tab" data-guide-tab="banner-guide">배너 풀패키지</button>
-    </div>
-
-    <div class="guide-panel active" id="onepage-guide">
-      <ol class="badge-list">
-        <li><span class="lnum">1</span><div>(필수) 상반신 5컷 이상</div></li>
-        <li><span class="lnum">2</span><div>(선택) 전신 2컷 이상, 얼빡 2컷 이상<br>모든 컷을 사용하지는 않으나, 레퍼런스나 레이아웃에 따라 추가 컷으로 사용할 수 있습니다.<br>오리지널 아바타 공개나 신의상 공개처럼 실루엣 처리가 필요한 포스터일 경우는 전신 3컷, 상반신 3컷 보내주시면 됩니다. (다른 포스터 타입은 해당 없음)</div></li>
-        <li><span class="lnum">3</span><div>포스터에 넣고 싶은 문구: 이벤트 날짜, 이벤트 내용 등 포스터에 들어가야 할 텍스트</div></li>
-      </ol>
-    </div>
-
-    <div class="guide-panel" id="lookbook-guide">
-      <ol class="badge-list">
-        <li><span class="lnum">1</span><div>메인 비주얼(첫 페이지)에 들어갈 상반신 5컷 이상</div></li>
-        <li><span class="lnum">2</span><div>각 의상마다 전신 1컷 이상<br>캐릭터 및 의상 잘리는 부분 없게 사진 확인해 주세요. 레이아웃에 따라 전신을 쓰는 경우도 있고, 허벅지에서 자르는 경우도 있습니다.<br>의상마다 포즈를 다르게 하면 훨씬 좋은 결과물이 나옵니다.</div></li>
-        <li><span class="lnum">3</span><div>각 헤어마다 상반신 1컷 이상<br>헤어 윗부분, 좌우 잘리지 않게 사진 확인해 주세요.</div></li>
-        <li><span class="lnum">4</span><div>메인 비주얼(첫 페이지)에 넣고 싶은 문구: 룰렛 기간, 서버 기간 등 넣고 싶은 텍스트 작성해 주세요.</div></li>
-        <li><span class="lnum">5</span><div>의상 안내 페이지에 넣고 싶은 문구: 없어도 됩니다.</div></li>
-        <li><span class="lnum">6</span><div>헤어 안내 페이지에 넣고 싶은 문구: 없어도 됩니다.</div></li>
-        <li><span class="lnum">7</span><div>확정 보상 안내 페이지(4번째 페이지)에 들어갈 내용 적어 주세요.</div></li>
-      </ol>
-    </div>
-
-    <div class="guide-panel" id="banner-guide">
-      <ol class="badge-list">
-        <li><span class="lnum">1</span><div>상반신 12컷 이상</div></li>
-        <li><span class="lnum">2</span><div>전신 3컷 이상</div></li>
-        <li><span class="lnum">3</span><div>얼빡 5컷 이상</div></li>
-        <li><span class="lnum">4</span><div>배너 풀패키지에 들어갈 이름(닉네임 자체를 그대로 적어 주셔도 되고, 시청자라면 시청자를 부르는 애칭을 적어 주셔도 됩니다.)</div></li>
-        <li><span class="lnum">5</span><div>(선택) 시청자에게 선물할 목적이라면 시청자 아이디를 적어 주세요. 디자인에 영문을 활용할 일이 많아 참고하기 위함입니다.</div></li>
-        <li><span class="lnum">6</span><div>반드시 넣고 싶은 텍스트가 있다면 적어 주세요.</div></li>
-        <li><span class="lnum">7</span><div>(중요) 다수의 패키지를 신청할 시 패키지마다 다른 의상 및 헤어로 사진 촬영하는 것을 권장합니다. 훨씬 다채로운 느낌이 듭니다.</div></li>
-      </ol>
-    </div>
-  </div>
-</section>
-
-<!-- 문의 양식 -->
-<section class="section-soft">
-  <div class="wrap">
-    <div class="eyebrow">BEFORE YOU ASK</div>
-    <h2>문의 양식</h2>
-    <p class="lead">상품에 맞는 양식을 복사해서 문의 시 함께 보내주세요.</p>
-
-    <div class="triple-grid">
-      <div class="triple-card">
-        <h4>원페이지 포스터</h4>
-        <div class="field"><div class="fname">1. 방송국 주소</div></div>
-        <div class="field"><div class="fname">2. 포스터 타입</div><div class="fplaceholder">데뷔, 생일, 역팬데이 등</div></div>
-        <div class="field"><div class="fname">3. 원하는 마감 기한</div></div>
-        <div class="field"><div class="fname">4. 특이사항</div><div class="fplaceholder">원하는 특정 컨셉이 있다거나, 반드시 추가해야 하는 내용이 있다면 말씀해 주세요.</div></div>
-      </div>
-
-      <div class="triple-card">
-        <h4>룩북 패키지</h4>
-        <div class="field"><div class="fname">1. 방송국 주소</div></div>
-        <div class="field"><div class="fname">2. 프로젝트 타이틀</div><div class="fplaceholder">12월 룰렛, 충동서버 API 보상 등 — 메인 비주얼 타이틀로 들어갈 룩북 패키지의 타이틀</div></div>
-        <div class="field"><div class="fname">3. 원하는 마감 기한</div></div>
-        <div class="field"><div class="fname">4. 의상 개수</div><div class="fplaceholder">8가지 또는 3의 배수일 때 가장 깔끔합니다.</div></div>
-        <div class="field"><div class="fname">5. 헤어 개수</div><div class="fplaceholder">9가지 또는 4의 배수일 때 가장 깔끔합니다.</div></div>
-        <div class="field"><div class="fname">6. 특이사항</div><div class="fplaceholder">원하는 특정 컨셉이 있다거나, 반드시 추가해야 하는 내용이 있다면 말씀해 주세요.</div></div>
-      </div>
-
-      <div class="triple-card">
-        <h4>배너 풀패키지</h4>
-        <div class="field"><div class="fname">1. 방송국 주소</div></div>
-        <div class="field"><div class="fname">2. 필요 개수</div><div class="fplaceholder">패키지 몇 개가 필요한지</div></div>
-        <div class="field"><div class="fname">3. 원하는 마감 기한</div></div>
-        <div class="field"><div class="fname">4. 특이사항</div><div class="fplaceholder">원하는 특정 컨셉이 있다거나, 반드시 추가해야 하는 내용이 있다면 말씀해 주세요.</div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FAQ -->
-<section>
-  <div class="wrap">
-    <div class="eyebrow">FAQ</div>
-    <h2>자주 묻는 질문</h2>
-    <div class="faq-list">
-      <div class="faq-item">
-        <div class="faq-q">마감 기한은 어떻게 되나요?</div>
-        <div class="faq-a">결제 및 <b>자료 전달일</b> 기준 평균 7일 이내 완료되고 있습니다. 정확한 마감 일정은 작업할 내용에 따라 달라질 수 있으니 직접 문의를 통해 확인해 주세요.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">세금계산서, 현금영수증 발행이 가능한가요?</div>
-        <div class="faq-a">아트머그 플랫폼 운영지침에 따라 2026년 8월 1일부터 비사업자 작가는 세금계산서, 현금영수증 발행이 <b>불가합니다</b>.<br>대신 결제 후 주문 관리에서 <b>거래명세서</b>를 출력할 수 있으며, 이를 세무·회계 과정에서 지출 증빙으로 사용 가능합니다.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">PSD 파일 받을 수 있나요?</div>
-        <div class="faq-a">유료 에셋 이미지를 사용하는 경우가 간혹 있기 때문에 PSD 파일 공유는 불가능합니다.</div>
-      </div>
-    </div>
-  </div>
-</section>
+</div>
 
 <script>
-  // 원페이지: 자유 스크롤 캐러셀
-  document.querySelectorAll('[data-carousel-next]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const track = document.getElementById(btn.dataset.carouselNext);
-      track.scrollBy({left: track.clientWidth, behavior:'smooth'});
-    });
-  });
-  document.querySelectorAll('[data-carousel-prev]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const track = document.getElementById(btn.dataset.carouselPrev);
-      track.scrollBy({left: -track.clientWidth, behavior:'smooth'});
-    });
-  });
+/* Dock 확대·스프링·튀어오르기 방식은 puruvj/macos-web(MIT License, © 2021 Puru Vijay)의 Dock 구현을 참고해 바닐라 JS로 옮겼습니다. */
+(function(){
+  var MENU_H = 28;
 
-  // 페이지 넘김형 캐러셀 (룩북 / 배너) 공통 함수 — 원페이지와 동일한 네이티브 스크롤 방식
-  function setupPagedCarousel(containerId, pageSelector, indicatorId){
-    const container = document.getElementById(containerId);
-    const pages = container.querySelectorAll(pageSelector);
-    let idx = 0;
-    function updateIndicator(){
-      const indicator = document.getElementById(indicatorId);
-      if(indicator) indicator.textContent = (idx+1) + ' / ' + pages.length;
-    }
-    function goTo(i){
-      idx = (i + pages.length) % pages.length;
-      container.scrollTo({left: idx * container.clientWidth, behavior:'smooth'});
-      updateIndicator();
-    }
-    document.querySelector('[data-pages-prev="'+containerId+'"]').addEventListener('click', ()=>{
-      goTo(idx - 1);
+  /* ─────────────────────────────────────────────
+     포트폴리오 이미지 불러오기 설정
+     owner/repo 를 채우면 GitHub 폴더의 실제 파일 목록을 읽어 자동으로 썸네일을 만들고,
+     비워두면 예시 이미지로 동작합니다. (이 미리보기는 예시 모드)
+     이미지 경로: base + 폴더명 + '/' + 파일명  →  assets/portfolio/lookbook/01-A.png
+     ───────────────────────────────────────────── */
+  var GH = { owner:'prequickit-spec', repo:'artmug-unnnyy', branch:'main', path:'assets', base:'assets/' };
+
+  /*PARSE_START*/
+  var ROLE_ORDER = { top:0, bot:1, float:2 };
+  var ROLE_CAP = { top:'상단 배너', bot:'하단 배너', float:'플로팅 배너' };
+  function rank(r){ return Object.prototype.hasOwnProperty.call(ROLE_ORDER, r) ? ROLE_ORDER[r] : 9; }
+  function parseFiles(mode, files){
+    var exts = /\.(png|jpe?g|webp|gif|avif)$/i, groups = Object.create(null), order = [];
+    files.forEach(function(f){
+      if(!exts.test(f)) return;
+      var stem = f.replace(exts, ''), key = stem, suffix = '';
+      var i = stem.lastIndexOf('-');
+      if(mode !== 'single' && i > 0 && i < stem.length - 1){ key = stem.slice(0, i); suffix = stem.slice(i + 1); }
+      var gk = key.toLowerCase();
+      if(!groups[gk]){ groups[gk] = { key:key, label:key, items:[] }; order.push(gk); }
+      var role = suffix.toLowerCase();
+      groups[gk].items.push({ file:f, stem:stem, suffix:suffix, role:role, cap: (mode === 'banner' && Object.prototype.hasOwnProperty.call(ROLE_CAP, role)) ? ROLE_CAP[role] : '' });
     });
-    document.querySelector('[data-pages-next="'+containerId+'"]').addEventListener('click', ()=>{
-      goTo(idx + 1);
+    var sets = order.map(function(gk){
+      var g = groups[gk];
+      g.items.sort(function(a, b){
+        if(mode === 'banner'){
+          var ra = rank(a.role), rb = rank(b.role);
+          if(ra !== rb) return ra - rb;
+        }
+        return a.suffix.localeCompare(b.suffix, undefined, { numeric:true, sensitivity:'base' });
+      });
+      var thumb = g.items[0];
+      if(mode === 'banner'){ for(var k = 0; k < g.items.length; k++){ if(g.items[k].role === 'bot'){ thumb = g.items[k]; break; } } }
+      g.thumb = thumb;
+      return g;
     });
-    let scrollTimer;
-    container.addEventListener('scroll', ()=>{
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(()=>{
-        idx = Math.round(container.scrollLeft / container.clientWidth);
-        updateIndicator();
-      }, 100);
+    sets.sort(function(a, b){
+      var na = /^\d+$/.test(a.label), nb = /^\d+$/.test(b.label);
+      if(na && nb){ var d = parseInt(b.label, 10) - parseInt(a.label, 10); return d || a.label.localeCompare(b.label); }
+      if(na !== nb) return na ? -1 : 1;
+      return a.label.localeCompare(b.label, undefined, { numeric:true, sensitivity:'base' });
     });
-    updateIndicator();
+    return sets;
   }
-  setupPagedCarousel('lookbook-pages', '.page-grid', 'lookbook-indicator');
-  setupPagedCarousel('banner-pages', '.banner-page', 'banner-indicator');
+  /*PARSE_END*/
 
-  // 자료 전달 가이드 탭
-  document.querySelectorAll('.guide-tab').forEach(tab=>{
-    tab.addEventListener('click', ()=>{
-      document.querySelectorAll('.guide-tab').forEach(t=>t.classList.remove('active'));
-      document.querySelectorAll('.guide-panel').forEach(p=>p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById(tab.dataset.guideTab).classList.add('active');
+  /* 예시 파일명 (예시 모드에서 실제 규칙 그대로 통과시켜 확인) */
+  function demoNames(id){
+    var out = [], i, n;
+    function p2(n){ return (n < 10 ? '0' : '') + n; }
+    if(id === 'poster'){ for(i = 1; i <= 6; i++) out.push(p2(i) + '.png'); }
+    if(id === 'lookbook'){ for(i = 1; i <= 6; i++){ ['A','B','C','D'].concat(i === 3 ? ['E'] : []).forEach(function(s){ out.push(p2(i) + '-' + s + '.png'); }); } }
+    if(id === 'banner'){ for(i = 1; i <= 8; i++){ ['top','bot','float'].forEach(function(s){ out.push(p2(i) + '-' + s + '.png'); }); } }
+    return out;
+  }
+
+  var isMobile = function(){ return window.innerWidth <= 860; };
+  var reducedMotion = function(){ return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); };
+  var vw = function(){ return window.innerWidth; };
+  var vh = function(){ return window.innerHeight; };
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+  function el(tag, cls){ var e = document.createElement(tag); if(cls) e.className = cls; return e; }
+
+  /* 시계 */
+  function tick(){
+    var d = new Date();
+    document.getElementById('clock').textContent = d.toLocaleString('ko-KR',{month:'long',day:'numeric',weekday:'short',hour:'numeric',minute:'2-digit'});
+  }
+  tick(); setInterval(tick, 20000);
+
+  /* ───────── 창 만들기 (포트폴리오 3개) ───────── */
+  var desktop = document.getElementById('desktop');
+  var PF = {
+    poster:   { title:'Poster', mode:'single', fit:'page',  bottom:false, product:'poster',   w:760, h:560 },
+    lookbook: { title:'Lookbook',   mode:'group',  fit:'width', bottom:false, product:'lookbook', w:800, h:580 },
+    banner:   { title:'Banner',   mode:'banner', fit:'width', wide:true,  product:'banner',   w:880, h:580 }
+  };
+  var dockAnchor = document.querySelector('.dock-wrap');
+  Object.keys(PF).forEach(function(id){
+    var c = PF[id];
+    var w = el('div', 'win pf' + (c.wide ? ' pf-wide' : ''));
+    w.id = 'win-' + id; w.setAttribute('data-app', 'Preview'); w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', c.title);
+    w.innerHTML =
+      '<div class="titlebar">' +
+        '<div class="traffic"><button class="red" data-act="close" aria-label="닫기"></button><button class="yellow" data-act="min" aria-label="최소화"></button><button class="green" data-act="zoom" aria-label="확대"></button></div>' +
+        '<button class="tb-btn pf-thumbtoggle" aria-label="썸네일 목록"><svg class="i"><use href="#i-sidebar"/></svg></button>' +
+        '<div class="pv-titles"><span class="pv-title"></span><span class="pv-sub"></span></div>' +
+        '<span class="tb-spacer"></span>' +
+        '<button class="tb-btn pf-zoomout" aria-label="축소"><svg class="i"><use href="#i-zoomout"/></svg></button>' +
+        '<button class="tb-btn pf-zoomin" aria-label="확대"><svg class="i"><use href="#i-zoomin"/></svg></button>' +
+        '<button class="inquire" type="button">문의하기</button>' +
+      '</div>' +
+      '<div class="pv-body"><div class="thumbs"></div><div class="canvas"><div class="stack"></div></div></div>';
+    w.querySelector('.pv-title').textContent = c.title;
+    desktop.insertBefore(w, dockAnchor);
+  });
+
+  /* ───────── 창 상태 ───────── */
+  var IDS = ['finder', 'poster', 'lookbook', 'banner', 'message'];
+  var W = {};
+  IDS.forEach(function(id){
+    W[id] = { el:document.getElementById('win-' + id), dock:document.querySelector('.dock-item[data-win="' + id + '"]'), open:false, placed:false, max:false, prev:null };
+  });
+  var zTop = 20, focused = null, anyDragging = false;
+  var MIN = { finder:[560,380], message:[560,380], poster:[480,360], lookbook:[480,360], banner:[480,360] };
+
+  function reserve(){ return isMobile() ? 92 : 104; }
+
+  function place(id){
+    var w = W[id], node = w.el;
+    if(w.placed || isMobile()) return;
+    var availH = vh() - MENU_H - reserve();
+    var width, height, left, top;
+    if(id === 'finder'){ width = 900; height = 580; }
+    else if(id === 'message'){ width = 780; height = 560; }
+    else { width = PF[id].w; height = PF[id].h; }
+    width = Math.min(width, vw() - 48); height = Math.min(height, availH - 24);
+    var nOpen = IDS.filter(function(k){ return k !== id && W[k].el.classList.contains('open'); }).length;
+    left = (vw() - width) / 2 + (id === 'finder' ? -70 : nOpen * 34 - 20);
+    top = MENU_H + Math.max(12, (availH - height) / 2) + (id === 'finder' ? 0 : nOpen * 26 - 12);
+    left = clamp(left, 12, Math.max(12, vw() - width - 12));
+    top = clamp(top, MENU_H + 8, Math.max(MENU_H + 8, vh() - reserve() - height + 20));
+    node.style.width = width + 'px'; node.style.height = height + 'px';
+    node.style.left = left + 'px'; node.style.top = top + 'px';
+    w.placed = true;
+  }
+
+  function setOrigin(id){
+    var w = W[id], r = w.dock.getBoundingClientRect();
+    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    w.el.style.transformOrigin = (cx - w.el.offsetLeft) + 'px ' + (cy - w.el.offsetTop) + 'px';
+  }
+
+  function focusWin(id){
+    IDS.forEach(function(k){ W[k].el.classList.toggle('focus', k === id); });
+    W[id].el.style.zIndex = ++zTop;
+    focused = id;
+  }
+
+  function bounceIcon(id){
+    var ic = W[id].dock.querySelector('.icon');
+    ic.classList.remove('bounce'); void ic.offsetWidth; ic.classList.add('bounce');
+    ic.addEventListener('animationend', function f(e){ if(e.animationName === 'bounce'){ ic.classList.remove('bounce'); ic.removeEventListener('animationend', f); } });
+  }
+
+  function showWin(id){
+    var w = W[id], wasOpen = w.open;
+    place(id);
+    if(id === 'finder') updateSpacer();
+    if(!w.el.classList.contains('open')){
+      setOrigin(id);
+      void w.el.offsetWidth;
+      w.el.classList.add('open');
+    }
+    w.open = true;
+    w.dock.classList.add('on');
+    w.dock.classList.remove('hint');
+    if(!wasOpen) bounceIcon(id);
+    if(PF[id]){ loadPortfolio(id); layoutPortfolio(id); }
+    focusWin(id);
+  }
+
+  function hideWin(id, keepDot){
+    var w = W[id];
+    setOrigin(id);
+    w.el.classList.remove('open');
+    if(!keepDot){ w.open = false; w.dock.classList.remove('on'); }
+    if(focused === id){
+      var other = IDS.filter(function(k){ return k !== id && W[k].el.classList.contains('open'); }).pop();
+      if(other){ focusWin(other); }
+      else { focused = null;  IDS.forEach(function(k){ W[k].el.classList.remove('focus'); }); }
+    }
+  }
+
+  function toggleMax(id){
+    var w = W[id], node = w.el;
+    if(isMobile()) return;
+    node.classList.add('snap');
+    if(!w.max){
+      w.prev = {l:node.style.left,t:node.style.top,w:node.style.width,h:node.style.height};
+      node.style.left = '12px'; node.style.top = (MENU_H + 8) + 'px';
+      node.style.width = (vw() - 24) + 'px'; node.style.height = (vh() - MENU_H - reserve() - 4) + 'px';
+      w.max = true;
+    } else {
+      node.style.left = w.prev.l; node.style.top = w.prev.t; node.style.width = w.prev.w; node.style.height = w.prev.h;
+      w.max = false;
+    }
+    setTimeout(function(){ node.classList.remove('snap'); if(PF[id]) layoutPortfolio(id); if(id === 'finder') updateSpacer(); }, 300);
+  }
+
+  IDS.forEach(function(id){
+    var node = W[id].el;
+    node.addEventListener('pointerdown', function(){ if(focused !== id && node.classList.contains('open')) focusWin(id); });
+    node.querySelectorAll('.traffic button').forEach(function(b){
+      b.addEventListener('click', function(e){
+        e.stopPropagation();
+        var a = b.getAttribute('data-act');
+        if(a === 'close') hideWin(id, false);
+        else if(a === 'min') hideWin(id, true);
+        else toggleMax(id);
+      });
+    });
+    W[id].dock.addEventListener('click', function(){
+      if(!node.classList.contains('open')) showWin(id);
+      else if(focused === id) hideWin(id, true);
+      else focusWin(id);
+    });
+
+    /* 드래그 */
+    var bar = node.querySelector('.titlebar');
+    var sx, sy, sl, st, dragging = false;
+    bar.addEventListener('pointerdown', function(e){
+      if(e.target.closest('button') || isMobile() || W[id].max || e.button > 0) return;
+      dragging = true; anyDragging = true; sx = e.clientX; sy = e.clientY; sl = node.offsetLeft; st = node.offsetTop;
+      node.classList.add('dragging');
+      bar.setPointerCapture(e.pointerId);
+    });
+    bar.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      node.style.left = clamp(sl + e.clientX - sx, 120 - node.offsetWidth, vw() - 120) + 'px';
+      node.style.top = clamp(st + e.clientY - sy, MENU_H, vh() - 70) + 'px';
+    });
+    function end(e){
+      if(!dragging) return; dragging = false; anyDragging = false; node.classList.remove('dragging');
+      try{ bar.releasePointerCapture(e.pointerId); }catch(_){}
+    }
+    bar.addEventListener('pointerup', end);
+    bar.addEventListener('pointercancel', end);
+    bar.addEventListener('dblclick', function(e){ if(!e.target.closest('button')) toggleMax(id); });
+
+    /* 크기 조절 (PC 전용) */
+    ['n','s','e','w','ne','nw','se','sw'].forEach(function(dir){
+      var h = el('div', 'rz'); h.setAttribute('data-dir', dir); node.appendChild(h);
+      var g = null;
+      h.addEventListener('pointerdown', function(e){
+        if(isMobile() || e.button > 0) return;
+        e.preventDefault(); e.stopPropagation();
+        focusWin(id); W[id].max = false;
+        g = { x:e.clientX, y:e.clientY, l:node.offsetLeft, t:node.offsetTop, w:node.offsetWidth, h:node.offsetHeight };
+        node.classList.add('dragging'); anyDragging = true;
+        h.setPointerCapture(e.pointerId);
+      });
+      h.addEventListener('pointermove', function(e){
+        if(!g) return;
+        var dx = e.clientX - g.x, dy = e.clientY - g.y, mn = MIN[id];
+        var l = g.l, t = g.t, w = g.w, hh = g.h;
+        if(dir.indexOf('e') > -1){ w = clamp(g.w + dx, mn[0], vw() - g.l); }
+        if(dir.indexOf('w') > -1){ w = clamp(g.w - dx, mn[0], g.l + g.w); l = g.l + g.w - w; }
+        if(dir.indexOf('s') > -1){ hh = clamp(g.h + dy, mn[1], vh() - g.t); }
+        if(dir.indexOf('n') > -1){ hh = clamp(g.h - dy, mn[1], g.t + g.h - MENU_H); t = g.t + g.h - hh; }
+        node.style.left = l + 'px'; node.style.top = t + 'px';
+        node.style.width = w + 'px'; node.style.height = hh + 'px';
+      });
+      function endR(e){
+        if(!g) return; g = null; node.classList.remove('dragging'); anyDragging = false;
+        try{ h.releasePointerCapture(e.pointerId); }catch(_){}
+      }
+      h.addEventListener('pointerup', endR);
+      h.addEventListener('pointercancel', endR);
     });
   });
-</script>
 
-</body>
-</html>
+  /* ───────── Finder (한 페이지 스크롤) ───────── */
+  var content = document.getElementById('content');
+  var secs = Array.prototype.slice.call(content.querySelectorAll('.doc-sec'));
+  var spacer = document.getElementById('docSpacer');
+  function scrollPad(){ var v = parseFloat(getComputedStyle(content).scrollPaddingTop); return isNaN(v) ? 0 : v; }
+  function updateSpacer(){
+    var last = secs[secs.length - 1];
+    var bp = parseFloat(getComputedStyle(content).paddingBottom) || 0;
+    spacer.style.height = Math.max(0, content.clientHeight - last.offsetHeight - scrollPad() - bp) + 'px';
+  }
+  function setActiveSec(id){
+    document.querySelectorAll('[data-scroll]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-scroll') === id); });
+  }
+  var spyRaf = 0;
+  function spy(){
+    spyRaf = 0;
+    var top = content.getBoundingClientRect().top, pad = scrollPad() + 16, cur = secs[0].id;
+    secs.forEach(function(s){ if(s.getBoundingClientRect().top - top <= pad) cur = s.id; });
+    if(content.scrollTop + content.clientHeight >= content.scrollHeight - 2) cur = secs[secs.length - 1].id;
+    setActiveSec(cur);
+  }
+  content.addEventListener('scroll', function(){ if(!spyRaf) spyRaf = requestAnimationFrame(spy); });
+  document.querySelectorAll('[data-scroll]').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.getElementById(b.getAttribute('data-scroll')).scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block:'start' });
+      W.finder.el.classList.remove('sidebar-open');
+    });
+  });
+  document.querySelectorAll('[data-open]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var id = b.getAttribute('data-open');
+      if(id === 'message') openMessage(b.getAttribute('data-product')); else showWin(id);
+      W.finder.el.classList.remove('sidebar-open');
+    });
+  });
+  function toggleSidebar(id){
+    var n = W[id].el;
+    if(isMobile() || n.classList.contains('narrow')) n.classList.toggle('sidebar-open');
+    else n.classList.toggle('sb-collapsed');
+  }
+  document.getElementById('sidebarToggle').addEventListener('click', function(){ toggleSidebar('finder'); });
+
+  /* ───────── 문의 창 ───────── */
+  var mContent = document.getElementById('mContent');
+  function selectProduct(key){
+    mContent.querySelectorAll('section[data-product]').forEach(function(s){ s.hidden = s.getAttribute('data-product') !== key; });
+    document.querySelectorAll('.m-item, .m-chips .chip').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-product') === key); });
+    mContent.scrollTop = 0;
+    W.message.el.classList.remove('sidebar-open');
+  }
+  function openMessage(key){ if(key) selectProduct(key); showWin('message'); }
+  document.querySelectorAll('.m-item, .m-chips .chip').forEach(function(b){ b.addEventListener('click', function(){ selectProduct(b.getAttribute('data-product')); }); });
+  document.getElementById('mListToggle').addEventListener('click', function(){ toggleSidebar('message'); });
+
+  /* ───────── 포트폴리오 ───────── */
+  var P = {};
+  function tint(i){ var h = (i * 31 + 205) % 360; return 'linear-gradient(160deg,hsl(' + h + ' 75% 96%),hsl(' + ((h + 25) % 360) + ' 65% 88%))'; }
+  function defaultRatio(mode, role){
+    if(mode === 'banner') return role === 'top' ? 3.2 : (role === 'bot' ? 2.4 : (role === 'float' ? 80 / 209 : 2.4));
+    return 0.75;
+  }
+  function srcOf(id, file){ return GH.base + id + '/' + encodeURIComponent(file); }
+
+  Object.keys(PF).forEach(function(id){
+    var node = W[id].el;
+    P[id] = {
+      id:id, cfg:PF[id], el:node, thumbs:node.querySelector('.thumbs'), canvas:node.querySelector('.canvas'), stack:node.querySelector('.stack'),
+      sub:node.querySelector('.pv-sub'), sets:[], sel:0, zoom:1, frames:[], loaded:false, demo:false
+    };
+    var p = P[id];
+    p.sub.textContent = '';
+    node.querySelector('.pf-zoomin').addEventListener('click', function(){ p.zoom = Math.min(4, p.zoom + .25); layoutPortfolio(id); });
+    node.querySelector('.pf-zoomout').addEventListener('click', function(){ p.zoom = Math.max(.5, p.zoom - .25); layoutPortfolio(id); });
+    node.querySelector('.pf-thumbtoggle').addEventListener('click', function(){
+      p.thumbs.style.display = (p.thumbs.style.display === 'none') ? '' : 'none'; layoutPortfolio(id);
+    });
+    node.querySelector('.inquire').addEventListener('click', function(){ openMessage(p.cfg.product); });
+    node.tabIndex = -1;
+    node.addEventListener('keydown', function(e){
+      if(!p.sets.length) return;
+      if(e.key === 'ArrowDown' || e.key === 'ArrowRight'){ selectSet(id, p.sel + 1); e.preventDefault(); }
+      if(e.key === 'ArrowUp' || e.key === 'ArrowLeft'){ selectSet(id, p.sel - 1); e.preventDefault(); }
+    });
+    showStatus(p, '불러오는 중…');
+  });
+
+  function showStatus(p, msg){
+    p.thumbs.innerHTML = ''; p.stack.innerHTML = '';
+    var d = el('div', 'pv-empty'); d.textContent = msg; p.stack.appendChild(d); p.frames = [];
+  }
+
+  function loadPortfolio(id){
+    var p = P[id];
+    if(p.loaded) return;
+    p.loaded = true;
+    if(!GH.owner){ p.demo = true; finishLoad(id, demoNames(id)); return; }
+    var url = 'https://api.github.com/repos/' + GH.owner + '/' + GH.repo + '/contents/' + GH.path + '/' + id + '?ref=' + GH.branch;
+    fetch(url).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(list){ finishLoad(id, list.filter(function(x){ return x.type === 'file'; }).map(function(x){ return x.name; })); })
+      .catch(function(){ p.loaded = false; showStatus(p, '이미지를 불러오지 못했어요. 잠시 후 다시 열어 주세요.'); });
+  }
+
+  function finishLoad(id, names){
+    var p = P[id];
+    p.sets = parseFiles(p.cfg.mode, names);
+    p.sub.textContent = (p.demo ? '예시 이미지 ' : '') + p.sets.length + '개';
+    if(!p.sets.length){ showStatus(p, '아직 올라온 작업물이 없어요.'); return; }
+    buildThumbs(id);
+    selectSet(id, 0);
+  }
+
+  function buildThumbs(id){
+    var p = P[id]; p.thumbs.innerHTML = '';
+    p.sets.forEach(function(s, i){
+      var b = el('button', 'thumb'); b.type = 'button'; b.setAttribute('aria-label', s.label);
+      var box = el('span', 't-img');
+      if(p.demo){ box.style.background = tint(i); }
+      else { var im = new Image(); im.loading = 'lazy'; im.alt = ''; im.src = srcOf(id, s.thumb.file); box.appendChild(im); }
+      var lb = el('span'); lb.textContent = s.label;
+      b.appendChild(box); b.appendChild(lb);
+      b.addEventListener('click', function(){ selectSet(id, i); });
+      p.thumbs.appendChild(b);
+    });
+  }
+
+  function selectSet(id, i){
+    var p = P[id];
+    if(!p.sets.length) return;
+    p.sel = clamp(i, 0, p.sets.length - 1);
+    var t = p.thumbs.children;
+    for(var k = 0; k < t.length; k++){ t[k].classList.toggle('sel', k === p.sel); }
+    if(t[p.sel] && t[p.sel].scrollIntoView) t[p.sel].scrollIntoView({block:'nearest', inline:'nearest'});
+    p.canvas.scrollTop = 0; p.canvas.scrollLeft = 0;
+    renderSet(id);
+  }
+
+  function renderSet(id){
+    var p = P[id], set = p.sets[p.sel];
+    p.stack.innerHTML = ''; p.frames = [];
+    set.items.forEach(function(it){
+      var item = el('div', 'item');
+      if(it.cap){ var cap = el('div', 'cap'); cap.textContent = it.cap; item.appendChild(cap); }
+      var frame = el('div', 'frame');
+      var f = { el:frame, role:it.role, ratio:defaultRatio(p.cfg.mode, it.role) };
+      if(p.demo){
+        frame.style.background = tint(p.sel);
+        var ph = el('div', 'ph');
+        var no = el('div', 'p-no'); no.textContent = it.stem;
+        var nt = el('div', 'p-note'); nt.textContent = (p.cfg.mode === 'banner' && it.role === 'float') ? '' : '예시 이미지 · 실제 작업물이 들어갈 자리';
+        ph.appendChild(no); ph.appendChild(nt); frame.appendChild(ph);
+      } else {
+        var img = new Image(); img.alt = set.label + (it.suffix ? ' ' + it.suffix : ''); img.decoding = 'async';
+        img.onload = function(){ if(img.naturalWidth){ f.ratio = img.naturalWidth / img.naturalHeight; layoutPortfolio(id); } };
+        img.onerror = function(){ frame.innerHTML = '<div class="ph"><span class="p-note">이미지를 불러오지 못했어요</span></div>'; };
+        img.src = srcOf(id, it.file);
+        frame.appendChild(img);
+      }
+      item.appendChild(frame);
+      p.stack.appendChild(item);
+      p.frames.push(f);
+    });
+    layoutPortfolio(id);
+  }
+
+  function layoutPortfolio(id){
+    var p = P[id];
+    if(!p || !p.frames.length) return;
+    var cw = p.canvas.clientWidth - 48, ch = p.canvas.clientHeight - 48;
+    if(cw <= 0 || ch <= 0) return;
+    p.frames.forEach(function(f){
+      var fixedFloat = p.cfg.mode === 'banner' && f.role === 'float';
+      var base = fixedFloat ? 80 : (p.cfg.fit === 'width' ? cw : Math.min(cw, ch * f.ratio));
+      var w = fixedFloat ? base * p.zoom : Math.max(60, base * p.zoom);
+      f.el.style.width = w + 'px';
+      f.el.style.aspectRatio = String(f.ratio);
+    });
+  }
+
+  /* ───────── Dock 확대 (macos-web 방식) ───────── */
+  var dock = document.getElementById('dock');
+  var dockItems = Array.prototype.map.call(dock.querySelectorAll('.dock-item'), function(b){
+    return { btn:b, tile:b.querySelector('.tile'), val:0, prev:0, target:0, settled:true };
+  });
+  function baseW(){ return isMobile() ? 44 : 56; }
+  var STIFF = .12, DAMP = .47;
+  var mouseX = null, raf = 0, lastT = 0;
+  var reduced = reducedMotion();
+  function canMagnify(){ return !isMobile() && !reduced && !anyDragging && window.matchMedia('(hover:hover)').matches; }
+  function widthFromDistance(d, base){
+    var L = base * 6;
+    var ins = [-L, -L / 1.25, -L / 2, 0, L / 2, L / 1.25, L];
+    var outs = [base, base * 1.1, base * 1.414, base * 2, base * 1.414, base * 1.1, base];
+    if(d <= ins[0] || d >= ins[6]) return base;
+    for(var i = 0; i < 6; i++){
+      if(d <= ins[i + 1]){ var t = (d - ins[i]) / (ins[i + 1] - ins[i]); return outs[i] + (outs[i + 1] - outs[i]) * t; }
+    }
+    return base;
+  }
+  function retarget(){
+    var b = baseW();
+    dockItems.forEach(function(it){
+      if(mouseX === null || !canMagnify()){ it.target = b; }
+      else { var r = it.tile.getBoundingClientRect(); it.target = widthFromDistance(mouseX - (r.left + r.width / 2), b); }
+      it.settled = false;
+    });
+    kick();
+  }
+  function frame(t){
+    raf = 0;
+    var dt = lastT ? Math.min((t - lastT) * 60 / 1000, 3) : 1; lastT = t;
+    var n = Math.max(1, Math.round(dt)), busy = false;
+    dockItems.forEach(function(it){
+      for(var k = 0; k < n; k++){
+        var delta = it.target - it.val, vel = it.val - it.prev;
+        it.prev = it.val; it.val = it.val + vel + (STIFF * delta - DAMP * vel);
+      }
+      if(Math.abs(it.target - it.val) < .05 && Math.abs(it.val - it.prev) < .05){ it.val = it.prev = it.target; it.settled = true; }
+      else busy = true;
+      it.tile.style.width = it.val + 'px'; it.tile.style.height = it.val + 'px';
+    });
+    if(busy) raf = requestAnimationFrame(frame); else lastT = 0;
+  }
+  function kick(){ if(!raf){ lastT = 0; raf = requestAnimationFrame(frame); } }
+  dockItems.forEach(function(it){ it.val = it.prev = it.target = baseW(); });
+  dock.addEventListener('mousemove', function(e){ mouseX = e.clientX; retarget(); });
+  dock.addEventListener('mouseleave', function(){ mouseX = null; retarget(); });
+
+  window.addEventListener('resize', function(){
+    var b = baseW();
+    dockItems.forEach(function(it){ it.val = it.prev = it.target = b; it.tile.style.width = ''; it.tile.style.height = ''; });
+    IDS.forEach(function(id){
+      var node = W[id].el;
+      if(!isMobile() && W[id].placed){
+        if(W[id].max){ node.style.width = (vw() - 24) + 'px'; node.style.height = (vh() - MENU_H - reserve() - 4) + 'px'; }
+        node.style.left = clamp(node.offsetLeft, 120 - node.offsetWidth, vw() - 120) + 'px';
+        node.style.top = clamp(node.offsetTop, MENU_H, vh() - 70) + 'px';
+      }
+      if(PF[id]) layoutPortfolio(id);
+    });
+    updateSpacer();
+  });
+
+  /* 창 크기가 바뀔 때: 이미지 다시 맞추기, 좁으면 사이드바 숨김 */
+  if(window.ResizeObserver){
+    var ro = new ResizeObserver(function(entries){
+      entries.forEach(function(en){
+        var id = en.target.id.replace('win-', '');
+        if(PF[id]) layoutPortfolio(id);
+        if(id === 'finder') updateSpacer();
+        if(id === 'finder' || id === 'message') en.target.classList.toggle('narrow', en.target.offsetWidth < 640);
+      });
+    });
+    IDS.forEach(function(id){ ro.observe(W[id].el); });
+  }
+
+  /* 시작: Finder 창을 열어둔 상태 */
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ showWin('finder'); }); });
+
+  /* 상품 예시 이미지: assets/product/<name>.(jpg|jpeg|png|webp|gif|avif) 중 먼저 찾은 한 장으로 자리표시 교체 */
+  var EX_EXT = ['jpg','png','webp','jpeg','gif','avif'];
+  Array.prototype.forEach.call(document.querySelectorAll('[data-ex]'), function(f){
+    var name = f.getAttribute('data-ex'), i = 0;
+    function tryNext(){
+      if(i >= EX_EXT.length) return;
+      var im = new Image();
+      im.onload = function(){
+        var ph = f.querySelector('.ph');
+        ph.classList.add('loaded'); ph.innerHTML = '';
+        im.alt = name; ph.appendChild(im);
+        if(!f.className.match(/bn-/)) ph.style.aspectRatio = im.naturalWidth + '/' + im.naturalHeight;
+        if(typeof updateSpacer === 'function') updateSpacer();
+      };
+      im.onerror = tryNext;
+      im.src = 'assets/product/' + name + '.' + EX_EXT[i++];
+    }
+    tryNext();
+  });
+
+  /* 문의 양식: 확인 체크 + 필수 입력 → 복사 */
+  Array.prototype.forEach.call(document.querySelectorAll('section[data-form]'), function(sec){
+    var btn = sec.querySelector('.copy-btn'), msg = sec.querySelector('.copy-msg');
+    var chks = sec.querySelectorAll('[data-chk]'), qs = sec.querySelectorAll('[data-q]');
+    function state(){
+      var allChk = Array.prototype.every.call(chks, function(c){ return c.checked; });
+      var allReq = Array.prototype.every.call(qs, function(q){ return !q.hasAttribute('data-req') || q.value.trim() !== ''; });
+      btn.disabled = !(allChk && allReq);
+      msg.textContent = btn.disabled ? (!allReq ? '* 항목을 모두 입력하고 확인 사항을 모두 켜면 복사할 수 있어요.' : '확인 사항을 모두 켜면 복사할 수 있어요.') : '';
+    }
+    function build(){
+      var out = ['[' + sec.getAttribute('data-title') + ']'];
+      var n = 0;
+      Array.prototype.forEach.call(qs, function(q){
+        n++; var v = q.value.trim();
+        if(!v) return;
+        out.push(q.tagName === 'TEXTAREA' ? (n + '. ' + q.getAttribute('data-q') + ':\n' + v) : (n + '. ' + q.getAttribute('data-q') + ': ' + v));
+      });
+      out.push('확인 사항 모두 확인함 ✓');
+      return out.join('\n');
+    }
+    function done(){
+      btn.textContent = '복사됨 ✓'; msg.textContent = '아트머그 문의 게시판에 붙여넣어 주세요.';
+      setTimeout(function(){ btn.textContent = '신청양식 복사하기'; state(); }, 2400);
+    }
+    function fallback(text){
+      var ta = sec.querySelector('.copy-fallback');
+      if(!ta){ ta = document.createElement('textarea'); ta.className = 'copy-fallback'; ta.readOnly = true; sec.appendChild(ta); }
+      ta.value = text; ta.focus(); ta.select();
+      msg.textContent = '자동 복사가 막혀 있어요. 아래 내용을 직접 복사해 주세요.';
+    }
+    function legacy(text){
+      var t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+      document.body.appendChild(t); t.select(); var ok = false;
+      try{ ok = document.execCommand('copy'); }catch(e){}
+      document.body.removeChild(t); return ok;
+    }
+    btn.addEventListener('click', function(){
+      if(btn.disabled) return;
+      var text = build();
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done, function(){ if(legacy(text)) done(); else fallback(text); });
+      } else if(legacy(text)) done(); else fallback(text);
+    });
+    sec.addEventListener('input', state); sec.addEventListener('change', state);
+    state();
+  });
+})();
+</script>
